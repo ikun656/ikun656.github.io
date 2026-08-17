@@ -13,7 +13,6 @@
         return match ? match[2] : null;
     }
 
-    // 等待 DOM 加载完成后执行
     function initPolicy() {
         const overlay = document.getElementById('policyOverlay');
         const agreeBtn = document.getElementById('agreeBtn');
@@ -22,7 +21,6 @@
             return;
         }
 
-        // 检查是否已同意
         if (getCookie('policy_agreed') === 'true') {
             overlay.classList.remove('show');
         } else {
@@ -35,7 +33,6 @@
         });
     }
 
-    // 如果 DOM 已加载则立即执行，否则监听 DOMContentLoaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initPolicy);
     } else {
