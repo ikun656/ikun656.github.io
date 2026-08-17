@@ -178,7 +178,7 @@
         </div>
     </div>
 
-    <!-- ===== 页面主体（同之前） ===== -->
+    <!-- ===== 页面主体 ===== -->
     <aside class="sidebar">
         <div class="brand">
             <div class="logo"><img src="home.jpg" alt="logo"> ikun656</div>
@@ -279,12 +279,10 @@
             const overlay = document.getElementById('policyOverlay');
             const agreeBtn = document.getElementById('agreeBtn');
 
-            // 检查是否已同意
             if (getCookie('policy_agreed') === 'true') {
                 overlay.classList.remove('show');
             } else {
                 overlay.classList.add('show');
-                // 禁止页面滚动（但遮罩本身固定，无需额外处理）
             }
 
             agreeBtn.addEventListener('click', function() {
