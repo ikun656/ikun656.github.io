@@ -588,7 +588,6 @@
             const btnDownload = document.getElementById('btnDownload');
             const btnCopyLink = document.getElementById('btnCopyLink');
             const btnOpenMarket = document.getElementById('btnOpenMarket');
-            const infoGrid = document.getElementById('infoGrid');
 
             // ===== 状态 =====
             let currentPublisher = '';
@@ -691,19 +690,18 @@
                 return null;
             }
 
-            // ===== 增强版获取版本（支持代理重试和超时） =====
+            // ===== 增强版获取版本 =====
             async function fetchVersions(publisher, extension) {
                 const apiUrl =
                     `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${publisher}/vsextensions/${extension}`;
 
-                // 代理列表（按优先级排序）
                 const proxyList = [
                     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
                     (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
                     (url) => `https://cors-anywhere.herokuapp.com/${url}`,
                 ];
 
-                // 1. 尝试直接请求（可能支持 CORS）
+                // 直接尝试
                 try {
                     const controller = new AbortController();
                     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -714,9 +712,8 @@
                     }
                 } catch (_) {}
 
-                // 2. 依次尝试代理
-                for (let i = 0; i < proxyList.length; i++) {
-                    const proxyFn = proxyList[i];
+                // 代理
+                for (const proxyFn of proxyList) {
                     try {
                         const proxyUrl = proxyFn(apiUrl);
                         const controller = new AbortController();
@@ -726,15 +723,13 @@
                         if (resp.ok) {
                             return await resp.json();
                         }
-                    } catch (_) {
-                        // 继续尝试下一个代理
-                    }
+                    } catch (_) {}
                 }
 
                 throw new Error('所有代理均无法获取版本列表，请手动输入版本号');
             }
 
-            // ===== 从 API 数据提取版本列表 =====
+            // ===== 提取版本 =====
             function extractVersions(data) {
                 if (!data) return [];
                 let versions = [];
@@ -767,7 +762,7 @@
                 });
             }
 
-            // ===== 更新版本下拉 =====
+            // ===== 更新下拉 =====
             function populateVersionSelect(versions, selectedVersion = null) {
                 versionSelect.innerHTML = '';
                 if (!versions || versions.length === 0) {
@@ -836,7 +831,6 @@
                         setStatus('error', '未找到任何版本，请检查扩展名称是否正确，或手动输入版本');
                         versionSelect.innerHTML = '<option value="">— 无版本 —</option>';
                         versionSelect.disabled = true;
-                        // 仍然保留 publisher/extension，允许手动输入
                         enableActions();
                         btnFetch.disabled = false;
                         btnFetch.textContent = '🔍 获取版本';
@@ -853,15 +847,13 @@
                 } catch (err) {
                     console.warn('Fetch error:', err);
                     setStatus('error', `获取失败：${err.message || '未知错误'}。请手动输入版本号。`);
-                    // 保留发布者/扩展名信息，下拉禁用但手动输入可用
                     versionSelect.innerHTML = '<option value="">— 请手动输入 —</option>';
                     versionSelect.disabled = true;
-                    // 如果手动输入已有值，尝试启用
                     if (manualVersion.value.trim()) {
                         currentVersion = manualVersion.value.trim();
                         enableActions();
                     } else {
-                        enableActions(); // 重新评估（此时无版本，禁用下载）
+                        enableActions();
                     }
                 } finally {
                     isFetching = false;
@@ -869,6 +861,80 @@
                     if (btnFetch.textContent === '⏳ 获取中...') {
                         btnFetch.textContent = '🔍 获取版本';
                     }
+                }
+            }
+
+            // ===== 下载：优先Fetch，失败回退 =====
+            async function handleDownload() {
+                if (!currentPublisher || !currentExtension || !currentVersion) {
+                    setStatus('error', '缺少必要信息，请先获取版本或手动输入版本');
+                    return;
+                }
+
+                const url = buildDownloadUrl(currentPublisher, currentExtension, currentVersion);
+                const filename = `${currentPublisher}.${currentExtension}-${currentVersion}.vsix`;
+
+                setStatus('loading', '正在准备下载...');
+                btnDownload.disabled = true;
+
+                try {
+                    // 尝试 fetch 下载（可捕获服务端错误）
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        redirect: 'follow',
+                        // 不设置 mode 默认 cors，可能会因跨域失败，但若失败则回退
+                    });
+
+                    if (!response.ok) {
+                        // 解析错误信息
+                        let errorMsg = `下载失败 (HTTP ${response.status})`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.message) {
+                                errorMsg = errorData.message;
+                            }
+                        } catch (_) {
+                            // 非JSON，尝试获取文本
+                            try {
+                                const text = await response.text();
+                                if (text) errorMsg = text.slice(0, 200);
+                            } catch (_) {}
+                        }
+                        setStatus('error', `❌ ${errorMsg}`);
+                        btnDownload.disabled = false;
+                        return;
+                    }
+
+                    // 获取 blob
+                    const blob = await response.blob();
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    setStatus('success', `✅ 下载完成：${filename}`);
+                    btnDownload.disabled = false;
+                    return;
+
+                } catch (err) {
+                    // 跨域或其他网络错误 → 回退到 a 标签下载
+                    console.warn('Fetch failed, fallback to direct download:', err);
+                    setStatus('info', '使用直接下载方式，若失败请尝试「复制链接」到浏览器打开或稍后重试');
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    // 无法确定下载状态，稍后重置按钮
+                    setTimeout(() => {
+                        btnDownload.disabled = false;
+                        // 但状态保留，不覆盖用户看到的信息
+                    }, 500);
+                    return;
                 }
             }
 
@@ -891,7 +957,7 @@
                 });
             });
 
-            // 版本下拉选择
+            // 版本下拉
             versionSelect.addEventListener('change', () => {
                 const val = versionSelect.value;
                 if (val) {
@@ -905,7 +971,7 @@
                 }
             });
 
-            // 手动输入版本
+            // 手动输入
             btnUseManual.addEventListener('click', () => {
                 const val = manualVersion.value.trim();
                 if (!val) {
@@ -934,27 +1000,7 @@
             });
 
             // 下载
-            btnDownload.addEventListener('click', () => {
-                if (!currentPublisher || !currentExtension || !currentVersion) {
-                    setStatus('error', '缺少必要信息，请先获取版本或手动输入版本');
-                    return;
-                }
-                const url = buildDownloadUrl(currentPublisher, currentExtension, currentVersion);
-                const filename = `${currentPublisher}.${currentExtension}-${currentVersion}.vsix`;
-
-                try {
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    link.target = '_blank';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    setStatus('success', `⬇ 开始下载：${filename}`);
-                } catch (err) {
-                    setStatus('error', `下载失败：${err.message}`);
-                }
-            });
+            btnDownload.addEventListener('click', handleDownload);
 
             // 复制链接
             btnCopyLink.addEventListener('click', async () => {
@@ -1005,7 +1051,7 @@
                 setStatus('info', '输入扩展标识或市场 URL，点击「获取版本」');
             }
 
-            console.log('VSIX 下载器已加载 (增强代理版)');
+            console.log('VSIX 下载器已加载 (增强下载)');
         })();
     </script>
 </body>
