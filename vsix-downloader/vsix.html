@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VSIX 下载加速器</title>
     <style>
-        /* ===== 原有样式 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f1f4f9; padding: 30px 20px; color: #1e293b; }
         .container { max-width: 700px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 30px 35px; }
@@ -46,101 +45,17 @@
         .actions .btn { flex: 1; min-width: 120px; padding: 14px 20px; font-size: 15px; }
         .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #64748b; text-align: center; }
 
-        /* ===== 政策弹窗样式 ===== */
-        .policy-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+        /* 闪动效果 */
+        .flash-success {
+            animation: flashGreen 0.6s ease;
         }
-        .policy-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .policy-card {
-            background: #fff;
-            max-width: 680px;
-            width: 90%;
-            max-height: 85vh;
-            border-radius: 24px;
-            padding: 32px 36px;
-            box-shadow: 0 24px 60px rgba(0,0,0,0.3);
-            overflow-y: auto;
-            transform: scale(0.95);
-            transition: transform 0.3s;
-        }
-        .policy-overlay.show .policy-card {
-            transform: scale(1);
-        }
-        .policy-card h2 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .policy-card .policy-text {
-            font-size: 15px;
-            line-height: 1.7;
-            color: #334155;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            border: 1px solid #eef2f8;
-            border-radius: 12px;
-            padding: 16px;
-            background: #f8fafc;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .policy-card .policy-text strong {
-            color: #2563eb;
-        }
-        .policy-card .btn-agree {
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            padding: 14px 40px;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            width: 100%;
-        }
-        .policy-card .btn-agree:hover {
-            background: #1d4ed8;
-        }
-        @media (max-width: 480px) {
-            .policy-card { padding: 24px 20px; }
-            .policy-card h2 { font-size: 20px; }
+        @keyframes flashGreen {
+            0%, 100% { background: transparent; }
+            50% { background: #d4edda; }
         }
     </style>
 </head>
 <body>
-
-    <!-- ===== 政策遮罩 ===== -->
-    <div class="policy-overlay" id="policyOverlay">
-        <div class="policy-card">
-            <h2>📋 请先同意政策</h2>
-            <div class="policy-text">
-                <strong>隐私政策</strong>
-                本工具站不会收集、存储或分享您的任何个人信息。所有功能均在浏览器本地运行，不涉及数据上传。您在使用过程中产生的任何数据仅保存在您的设备上。
-
-                <strong>开/闭源政策</strong>
-                本工具站代码（HTML/CSS/JavaScript）在 GitHub 上以公开方式托管，供学习参考。您可以根据个人需求对代码进行修改和二次开发，但不得用于商业用途或恶意传播。版权归原作者所有。
-            </div>
-            <button class="btn-agree" id="agreeBtn">同意并继续</button>
-        </div>
-    </div>
 
     <!-- ===== 页面主体 ===== -->
     <div class="container">
@@ -185,12 +100,14 @@
         <div class="footer">数据来自 Visual Studio Marketplace</div>
     </div>
 
+    <!-- 引入 policy.js（自包含弹窗） -->
     <script src="/policy.js"></script>
+
     <script>
         (function() {
             'use strict';
 
-            // ===== 原有 VSIX 完整逻辑 =====
+            // ===== DOM 引用 =====
             const inputEl = document.getElementById('inputExtension');
             const btnFetch = document.getElementById('btnFetch');
             const statusEl = document.getElementById('status');
@@ -205,12 +122,14 @@
             const btnCopyLink = document.getElementById('btnCopyLink');
             const btnOpenMarket = document.getElementById('btnOpenMarket');
 
+            // ===== 状态 =====
             let currentPublisher = '';
             let currentExtension = '';
             let currentVersion = '';
             let allVersions = [];
             let isFetching = false;
 
+            // ===== 工具函数 =====
             function setStatus(type, message, extra) {
                 statusEl.className = 'status show ' + type;
                 statusText.textContent = message;
@@ -267,6 +186,7 @@
                 return `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${publisher}/vsextensions/${extension}/${version}/vspackage`;
             }
 
+            // ===== 解析输入 =====
             function parseInput(raw) {
                 let str = raw.trim();
                 if (!str) return null;
@@ -293,33 +213,47 @@
                 return null;
             }
 
+            // ===== 获取版本（增强版，带多个代理和重试） =====
             async function fetchVersions(publisher, extension) {
                 const apiUrl = `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${publisher}/vsextensions/${extension}`;
+
+                // 代理列表（按优先级排列，越靠前越优先使用）
                 const proxyList = [
-                    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                    // 1. 直接请求（如果支持 CORS）
+                    (url) => url,
+                    // 2. 常用代理
                     (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
                     (url) => `https://cors-anywhere.herokuapp.com/${url}`,
                 ];
-                try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000);
-                    const resp = await fetch(apiUrl, { signal: controller.signal });
-                    clearTimeout(timeout);
-                    if (resp.ok) return await resp.json();
-                } catch (_) {}
+
+                let lastError = null;
+
                 for (const proxyFn of proxyList) {
                     try {
-                        const proxyUrl = proxyFn(apiUrl);
+                        const targetUrl = proxyFn(apiUrl);
                         const controller = new AbortController();
-                        const timeout = setTimeout(() => controller.abort(), 12000);
-                        const resp = await fetch(proxyUrl, { signal: controller.signal });
+                        const timeout = setTimeout(() => controller.abort(), 15000); // 15秒超时
+                        const resp = await fetch(targetUrl, { signal: controller.signal });
                         clearTimeout(timeout);
-                        if (resp.ok) return await resp.json();
-                    } catch (_) {}
+                        if (resp.ok) {
+                            return await resp.json();
+                        } else {
+                            // 如果状态码非200，记录错误但继续尝试下一个
+                            lastError = `HTTP ${resp.status}`;
+                            continue;
+                        }
+                    } catch (err) {
+                        lastError = err.message || '网络错误';
+                        // 继续尝试下一个代理
+                        continue;
+                    }
                 }
-                throw new Error('所有代理均无法获取版本列表，请手动输入版本号');
+
+                throw new Error(`所有请求方式均失败，最后错误：${lastError}。请检查网络或手动输入版本号。`);
             }
 
+            // ===== 提取版本列表 =====
             function extractVersions(data) {
                 if (!data) return [];
                 let versions = [];
@@ -350,6 +284,7 @@
                 });
             }
 
+            // ===== 更新版本下拉 =====
             function populateVersionSelect(versions, selectedVersion) {
                 versionSelect.innerHTML = '';
                 if (!versions || versions.length === 0) {
@@ -381,6 +316,7 @@
                 enableActions();
             }
 
+            // ===== 主流程：获取版本 =====
             async function handleFetch() {
                 if (isFetching) return;
                 const raw = inputEl.value.trim();
@@ -401,6 +337,7 @@
                 isFetching = true;
                 btnFetch.disabled = true;
                 btnFetch.textContent = '⏳ 获取中...';
+
                 try {
                     const data = await fetchVersions(publisher, extension);
                     const versions = extractVersions(data);
@@ -424,6 +361,7 @@
                     setStatus('error', `获取失败：${err.message || '未知错误'}。请手动输入版本号。`);
                     versionSelect.innerHTML = '<option value="">— 请手动输入 —</option>';
                     versionSelect.disabled = true;
+                    // 保留手动输入可能性
                     if (manualVersion.value.trim()) {
                         currentVersion = manualVersion.value.trim();
                         enableActions();
@@ -439,6 +377,7 @@
                 }
             }
 
+            // ===== 下载（优先 fetch，失败降级） =====
             async function handleDownload() {
                 if (!currentPublisher || !currentExtension || !currentVersion) {
                     setStatus('error', '缺少必要信息，请先获取版本或手动输入版本');
@@ -448,6 +387,7 @@
                 const filename = `${currentPublisher}.${currentExtension}-${currentVersion}.vsix`;
                 setStatus('loading', '正在准备下载...');
                 btnDownload.disabled = true;
+
                 try {
                     const response = await fetch(url, { method: 'GET', redirect: 'follow' });
                     if (!response.ok) {
@@ -476,8 +416,8 @@
                     setStatus('success', `✅ 下载完成：${filename}`);
                     btnDownload.disabled = false;
                 } catch (err) {
-                    console.warn('Fetch failed, fallback to direct download:', err);
-                    setStatus('info', '使用直接下载方式，若失败请尝试「复制链接」到浏览器打开或稍后重试');
+                    console.warn('Fetch failed, fallback to direct link:', err);
+                    setStatus('info', '尝试直接下载，若失败请复制链接到浏览器打开');
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = filename;
@@ -491,7 +431,9 @@
                 }
             }
 
-            // 事件绑定
+            // ===== 事件绑定 =====
+
+            // 获取版本
             btnFetch.addEventListener('click', handleFetch);
             inputEl.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -499,12 +441,16 @@
                     handleFetch();
                 }
             });
+
+            // 快捷示例
             document.querySelectorAll('[data-example]').forEach(el => {
                 el.addEventListener('click', () => {
                     inputEl.value = el.dataset.example;
                     handleFetch();
                 });
             });
+
+            // 版本下拉
             versionSelect.addEventListener('change', () => {
                 const val = versionSelect.value;
                 if (val) {
@@ -517,6 +463,8 @@
                     enableActions();
                 }
             });
+
+            // 手动输入
             btnUseManual.addEventListener('click', () => {
                 const val = manualVersion.value.trim();
                 if (!val) {
@@ -524,4 +472,79 @@
                     return;
                 }
                 if (allVersions.length > 0 && !allVersions.includes(val)) {
-                    setStatus('
+                    setStatus('info', `使用手动版本：${val}（不在获取的版本列表中）`);
+                } else {
+                    setStatus('success', `使用版本：${val}`);
+                }
+                currentVersion = val;
+                if (allVersions.includes(val)) {
+                    versionSelect.value = val;
+                } else {
+                    versionSelect.value = '';
+                }
+                enableActions();
+            });
+            manualVersion.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnUseManual.click();
+                }
+            });
+
+            // 下载
+            btnDownload.addEventListener('click', handleDownload);
+
+            // 复制链接
+            btnCopyLink.addEventListener('click', async () => {
+                if (!currentPublisher || !currentExtension || !currentVersion) {
+                    setStatus('error', '缺少必要信息，请先获取版本或手动输入版本');
+                    return;
+                }
+                const url = buildDownloadUrl(currentPublisher, currentExtension, currentVersion);
+                try {
+                    await navigator.clipboard.writeText(url);
+                    setStatus('success', '✅ 下载链接已复制到剪贴板');
+                    btnCopyLink.classList.remove('flash-success');
+                    void btnCopyLink.offsetWidth;
+                    btnCopyLink.classList.add('flash-success');
+                } catch (_) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = url;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    setStatus('success', '✅ 下载链接已复制到剪贴板');
+                }
+            });
+
+            // 打开市场页
+            btnOpenMarket.addEventListener('click', () => {
+                if (!currentPublisher || !currentExtension) {
+                    setStatus('error', '缺少发布者或扩展名');
+                    return;
+                }
+                const url = buildMarketUrl(currentPublisher, currentExtension);
+                window.open(url, '_blank');
+            });
+
+            // ===== 初始化 =====
+            resetUI();
+            hideStatus();
+            setInfo('—', '—');
+            inputEl.focus();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const q = urlParams.get('q');
+            if (q) {
+                inputEl.value = q;
+                handleFetch();
+            } else {
+                setStatus('info', '输入扩展标识或市场 URL，点击「获取版本」');
+            }
+
+            console.log('VSIX 下载器已启动 (修复版)');
+        })();
+    </script>
+</body>
+</html>
