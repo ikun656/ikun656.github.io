@@ -51,11 +51,14 @@
             align-items: center;
             gap: 8px;
         }
-        .sidebar .brand .logo span {
-            font-size: 24px;
+        .sidebar .brand .logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: cover;
+            border-radius: 6px;
+            vertical-align: middle;
             background: none;
             -webkit-text-fill-color: initial;
-            color: #2563eb;
         }
         .sidebar .brand .sub {
             font-size: 13px;
@@ -381,7 +384,10 @@
     <!-- ===== 左侧导航 ===== -->
     <aside class="sidebar">
         <div class="brand">
-            <div class="logo"><span>🛠</span> ikun656</div>
+            <div class="logo">
+                <img src="home.jpg" alt="logo">
+                ikun656
+            </div>
             <div class="sub">工具站 · 轻量实用</div>
         </div>
         <ul class="nav-list" id="navList">
@@ -612,8 +618,6 @@
 
             // 初始自动格式化示例（可选）
             window.addEventListener('load', function() {
-                // 如果输入框有默认内容，可以自动格式化一次，但为了不干扰用户，先不自动执行。
-                // 用户可自行点击按钮。
                 setStatus('输入 JSON 数据，点击按钮操作', '');
                 hideResult();
             });
