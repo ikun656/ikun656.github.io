@@ -106,11 +106,7 @@
             margin-top: 12px;
             font-size: 13px;
             color: #94a3b8;
-        }
-
-        .sidebar .footer-nav a {
-            color: #2563eb;
-            text-decoration: none;
+            text-align: center;
         }
 
         /* ===== 右侧主内容 ===== */
@@ -126,7 +122,8 @@
 
         .main .page {
             display: none;
-            max-width: 720px;
+            max-width: 820px;
+            width: 100%;
         }
 
         .main .page.active {
@@ -189,6 +186,14 @@
         .main .page .btn-primary:hover .arrow {
             transform: translateX(4px);
         }
+        .main .page .btn-secondary {
+            background: #e9edf4;
+            color: #1e293b;
+            margin-left: 12px;
+        }
+        .main .page .btn-secondary:hover {
+            background: #d5dce4;
+        }
 
         .main .page .status-badge {
             display: inline-block;
@@ -199,6 +204,98 @@
             padding: 4px 14px;
             border-radius: 30px;
             margin-bottom: 16px;
+        }
+
+        /* ===== JSON 工具专用样式 ===== */
+        .json-tool-area {
+            margin: 16px 0;
+        }
+        .json-tool-area textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 2px solid #d1d9e6;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border 0.2s;
+            background: #ffffff;
+        }
+        .json-tool-area textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .json-tool-area .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .json-tool-area .btn-group .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: #eef2f8;
+            color: #1e293b;
+        }
+        .json-tool-area .btn-group .btn:hover {
+            background: #d5dce4;
+        }
+        .json-tool-area .btn-group .btn.primary {
+            background: #2563eb;
+            color: #fff;
+        }
+        .json-tool-area .btn-group .btn.primary:hover {
+            background: #1d4ed8;
+        }
+        .json-tool-area .btn-group .btn.success {
+            background: #28a745;
+            color: #fff;
+        }
+        .json-tool-area .btn-group .btn.success:hover {
+            background: #1e7e34;
+        }
+        .json-tool-area .btn-group .btn.danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        .json-tool-area .btn-group .btn.danger:hover {
+            background: #c82333;
+        }
+        .json-tool-area .result-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 14px;
+            color: #0f172a;
+        }
+        .json-tool-area .result-box.error {
+            color: #dc3545;
+            background: #fde8e8;
+            border-color: #f5c6cb;
+        }
+        .json-tool-area .status-msg {
+            font-size: 14px;
+            color: #475569;
+            margin: 6px 0 4px;
+        }
+        .json-tool-area .status-msg.error {
+            color: #dc3545;
+        }
+        .json-tool-area .status-msg.success {
+            color: #28a745;
         }
 
         /* ===== 响应式 ===== */
@@ -271,6 +368,11 @@
                 width: 100%;
                 text-align: center;
             }
+            .json-tool-area .btn-group .btn {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -297,7 +399,7 @@
             </li>
         </ul>
         <div class="footer-nav">
-            <a href="https://github.com/ikun656" target="_blank">GitHub</a> · 开源
+            © 2026 ikun656 · 保留所有权利
         </div>
     </aside>
 
@@ -309,12 +411,12 @@
             <div class="page-icon">🚀</div>
             <h2>欢迎来到 ikun656 工具站</h2>
             <div class="page-desc">
-                这里收集了一些我开发或收集的实用在线小工具，全部免费、轻量、无需注册。
+                这里收集了一些实用在线小工具，全部免费、轻量、无需注册。
                 点击左侧菜单即可切换，每个工具都配有独立页面和跳转链接。
             </div>
-            <div class="page-meta">📅 持续更新 · 开源分享</div>
-            <a href="https://github.com/ikun656" class="btn-primary" target="_blank">
-                查看 GitHub <span class="arrow">→</span>
+            <div class="page-meta">📅 持续更新 · 个人作品</div>
+            <a href="#" class="btn-primary" style="background:#94a3b8; cursor:default;">
+                了解详情 <span class="arrow">→</span>
             </a>
         </div>
 
@@ -331,22 +433,30 @@
             <a href="./vsix-downloader/vsix.html" class="btn-primary">
                 前往使用 <span class="arrow">→</span>
             </a>
-            <!-- 如果你的 VSIX 页面路径不同，请修改 href -->
         </div>
 
-        <!-- 页面：JSON 格式化器（占位） -->
+        <!-- 页面：JSON 格式化器（真实工具） -->
         <div class="page" id="page-json">
             <div class="page-icon">📋</div>
             <h2>JSON 格式化器</h2>
-            <div class="status-badge">⏳ 开发中</div>
+            <div class="status-badge">✅ 在线工具</div>
             <div class="page-desc">
-                提供 JSON 数据的格式化、校验、压缩和转义功能。<br />
-                支持美化和压缩模式，方便调试和阅读。
+                粘贴 JSON 数据，一键格式化、压缩或校验，帮助你快速调试和阅读。
             </div>
-            <div class="page-meta">🧪 预计上线：2026 年 Q3</div>
-            <button class="btn-primary" style="background:#94a3b8; cursor:default;">
-                敬请期待 <span class="arrow">🔜</span>
-            </button>
+
+            <div class="json-tool-area">
+                <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":1.0}</textarea>
+                <div class="btn-group">
+                    <button class="btn primary" id="btnFormat">✨ 格式化</button>
+                    <button class="btn" id="btnCompress">📦 压缩</button>
+                    <button class="btn success" id="btnValidate">✔️ 校验</button>
+                    <button class="btn danger" id="btnClear">🗑️ 清空</button>
+                </div>
+                <div id="jsonStatus" class="status-msg">等待操作…</div>
+                <div id="jsonResult" class="result-box" style="display:none;"></div>
+            </div>
+
+            <div class="page-meta">💡 纯前端处理，数据不会上传服务器</div>
         </div>
 
         <!-- 页面：更多工具（占位） -->
@@ -361,9 +471,9 @@
                 • 二维码生成器<br />
                 • 颜色转换工具
             </div>
-            <div class="page-meta">💡 如果你有想法，欢迎在 GitHub 提 Issue</div>
-            <a href="https://github.com/ikun656" class="btn-primary" target="_blank">
-                提交建议 <span class="arrow">→</span>
+            <div class="page-meta">💡 如果你有想法，欢迎反馈</div>
+            <a href="#" class="btn-primary" style="background:#94a3b8; cursor:default;">
+                敬请期待 <span class="arrow">🔜</span>
             </a>
         </div>
 
@@ -373,7 +483,7 @@
         (function() {
             'use strict';
 
-            // 获取所有导航项和页面
+            // ===== 导航切换 =====
             const navItems = document.querySelectorAll('#navList li');
             const pages = {
                 home: document.getElementById('page-home'),
@@ -382,64 +492,135 @@
                 more: document.getElementById('page-more')
             };
 
-            // 切换页面函数
             function switchPage(pageId) {
-                // 隐藏所有页面
-                Object.values(pages).forEach(page => page.classList.remove('active'));
-                // 显示目标页面
-                if (pages[pageId]) {
-                    pages[pageId].classList.add('active');
-                }
-                // 更新导航高亮
+                Object.values(pages).forEach(p => p.classList.remove('active'));
+                if (pages[pageId]) pages[pageId].classList.add('active');
                 navItems.forEach(item => {
                     item.classList.remove('active');
-                    if (item.dataset.page === pageId) {
-                        item.classList.add('active');
-                    }
+                    if (item.dataset.page === pageId) item.classList.add('active');
                 });
-                // 滚动到顶部（移动端友好）
                 document.querySelector('.main').scrollTop = 0;
             }
 
-            // 绑定点击事件
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    const pageId = this.dataset.page;
-                    if (pageId) {
-                        switchPage(pageId);
-                    }
-                });
-            });
-
-            // 可选：根据 URL hash 初始加载
-            const hash = window.location.hash.replace('#', '');
-            if (hash && pages[hash]) {
-                switchPage(hash);
-            }
-
-            // 监听 hash 变化（支持浏览器前进后退）
-            window.addEventListener('hashchange', function() {
-                const hash = window.location.hash.replace('#', '');
-                if (hash && pages[hash]) {
-                    switchPage(hash);
-                }
-            });
-
-            // 点击导航时更新 hash（可选）
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const pageId = this.dataset.page;
                     if (pageId) {
+                        switchPage(pageId);
                         history.pushState(null, '', '#' + pageId);
                     }
                 });
             });
 
-            console.log('ikun656 工具站已启动！');
+            // 处理 hash 初始加载
+            const hash = window.location.hash.replace('#', '');
+            if (hash && pages[hash]) switchPage(hash);
+            window.addEventListener('hashchange', function() {
+                const h = window.location.hash.replace('#', '');
+                if (h && pages[h]) switchPage(h);
+            });
+
+            // ===== JSON 工具逻辑 =====
+            const inputEl = document.getElementById('jsonInput');
+            const resultEl = document.getElementById('jsonResult');
+            const statusEl = document.getElementById('jsonStatus');
+            const btnFormat = document.getElementById('btnFormat');
+            const btnCompress = document.getElementById('btnCompress');
+            const btnValidate = document.getElementById('btnValidate');
+            const btnClear = document.getElementById('btnClear');
+
+            function setStatus(msg, type) {
+                statusEl.textContent = msg;
+                statusEl.className = 'status-msg' + (type ? ' ' + type : '');
+            }
+
+            function showResult(text, isError) {
+                if (text === undefined || text === null) text = '';
+                resultEl.textContent = text;
+                resultEl.style.display = 'block';
+                resultEl.className = 'result-box' + (isError ? ' error' : '');
+            }
+
+            function hideResult() {
+                resultEl.style.display = 'none';
+                resultEl.className = 'result-box';
+            }
+
+            function getJsonData() {
+                const raw = inputEl.value.trim();
+                if (!raw) {
+                    setStatus('请输入 JSON 数据', 'error');
+                    return null;
+                }
+                try {
+                    return JSON.parse(raw);
+                } catch (e) {
+                    setStatus('❌ JSON 解析错误: ' + e.message, 'error');
+                    showResult(e.message, true);
+                    return null;
+                }
+            }
+
+            btnFormat.addEventListener('click', function() {
+                const data = getJsonData();
+                if (data === null) return;
+                try {
+                    const formatted = JSON.stringify(data, null, 4);
+                    showResult(formatted, false);
+                    setStatus('✅ 格式化成功（缩进 4 空格）', 'success');
+                } catch (e) {
+                    setStatus('❌ 格式化失败: ' + e.message, 'error');
+                    showResult(e.message, true);
+                }
+            });
+
+            btnCompress.addEventListener('click', function() {
+                const data = getJsonData();
+                if (data === null) return;
+                try {
+                    const compressed = JSON.stringify(data);
+                    showResult(compressed, false);
+                    setStatus('✅ 压缩成功（已去除空格换行）', 'success');
+                } catch (e) {
+                    setStatus('❌ 压缩失败: ' + e.message, 'error');
+                    showResult(e.message, true);
+                }
+            });
+
+            btnValidate.addEventListener('click', function() {
+                const raw = inputEl.value.trim();
+                if (!raw) {
+                    setStatus('请输入 JSON 数据', 'error');
+                    hideResult();
+                    return;
+                }
+                try {
+                    JSON.parse(raw);
+                    setStatus('✅ 校验通过：有效的 JSON 格式', 'success');
+                    showResult('✓ JSON 语法正确，可以被解析。', false);
+                } catch (e) {
+                    setStatus('❌ 校验失败: ' + e.message, 'error');
+                    showResult(e.message, true);
+                }
+            });
+
+            btnClear.addEventListener('click', function() {
+                inputEl.value = '';
+                hideResult();
+                setStatus('已清空', '');
+            });
+
+            // 初始自动格式化示例（可选）
+            window.addEventListener('load', function() {
+                // 如果输入框有默认内容，可以自动格式化一次，但为了不干扰用户，先不自动执行。
+                // 用户可自行点击按钮。
+                setStatus('输入 JSON 数据，点击按钮操作', '');
+                hideResult();
+            });
+
+            console.log('ikun656 工具站已启动 (含 JSON 工具)');
         })();
     </script>
 
 </body>
 </html>
-
-
