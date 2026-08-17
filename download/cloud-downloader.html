@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud 文件下载器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f9;
+            padding: 40px 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 30px 35px;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sub {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2563eb;
+            padding-left: 14px;
+        }
+        .control {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        .control label {
+            font-weight: 500;
+            color: #334155;
+        }
+        .control select {
+            padding: 8px 16px;
+            border: 2px solid #d1d9e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            cursor: pointer;
+            flex: 1;
+            min-width: 200px;
+        }
+        .control select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 15px;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0 18px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 14px;
+            display: none;
+        }
+        .status.show {
+            display: block;
+        }
+        .status.error {
+            background: #fde8e8;
+            color: #721c24;
+        }
+        .status.success {
+            background: #e6f9ed;
+            color: #155724;
+        }
+        .file-list {
+            margin-top: 10px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eef2f8;
+            transition: background 0.15s;
+        }
+        .file-item:hover {
+            background: #fafcff;
+        }
+        .file-item .info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .file-item .name {
+            font-weight: 500;
+            color: #0f172a;
+            word-break: break-all;
+        }
+        .file-item .size {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .file-item .download-link {
+            background: #eef2f8;
+            color: #1e293b;
+            padding: 6px 16px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .file-item .download-link:hover {
+            background: #d5dce4;
+        }
+        .empty {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+            border-top: 1px solid #eef2f8;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📂 Cloud 文件下载器</h1>
+    <div class="sub">列出 <code>cloud</code> 目录下的所有文件，支持代理加速</div>
+
+    <div class="control">
+        <label for="proxySelect">代理加速：</label>
+        <select id="proxySelect">
+            <option value="">不使用代理</option>
+            <option value="https://v4.gh-proxy.org/" selected>https://v4.gh-proxy.org/</option>
+            <option value="https://ghproxy.com/">https://ghproxy.com/</option>
+            <option value="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz/</option>
+            <option value="https://gh.ddlc.top/">https://gh.ddlc.top/</option>
+        </select>
+        <button class="btn" id="refreshBtn">🔄 刷新列表</button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="file-list" id="fileList">
+        <div class="empty">点击「刷新列表」加载文件</div>
+    </div>
+
+    <div class="footer">
+        <span>仓库：ikun656/ikun656.github.io · 目录：/cloud</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ===== 配置 =====
+        const REPO_OWNER = 'ikun656';
+        const REPO_NAME = 'ikun656.github.io';
+        const DIR_PATH = 'cloud';   // 要列出的目录
+
+        // ===== DOM 元素 =====
+        const proxySelect = document.getElementById('proxySelect');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const statusEl = document.getElementById('status');
+        const fileListEl = document.getElementById('fileList');
+
+        // ===== 工具函数 =====
+        function setStatus(msg, type) {
+            statusEl.textContent = msg;
+            statusEl.className = 'status show' + (type ? ' ' + type : '');
+        }
+
+        function hideStatus() {
+            statusEl.className = 'status';
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileSize(file) {
+            return file.size !== undefined ? formatSize(file.size) : '未知';
+        }
+
+        // ===== 获取文件列表 =====
+        async function fetchFileList() {
+            const proxy = proxySelect.value.trim();
+            // 构建 GitHub API URL
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DIR_PATH}`;
+
+            let url = apiUrl;
+            if (proxy) {
+                // 代理拼接：大多数代理直接在前面加代理前缀
+                url = proxy + apiUrl;
+            }
+
+            setStatus('⏳ 正在获取文件列表...', '');
+            refreshBtn.disabled = true;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    let errMsg = `HTTP ${response.status}`;
+                    try {
+                        const data = await response.json();
+                        if (data.message) errMsg = data.message;
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                // GitHub API 返回数组（目录内容）
+                if (!Array.isArray(data)) {
+                    throw new Error('返回数据格式异常');
+                }
+
+                // 过滤出文件（type === 'file'），忽略目录
+                const files = data.filter(item => item.type === 'file');
+
+                if (files.length === 0) {
+                    setStatus('⚠️ cloud 目录为空，请上传文件', 'error');
+                    fileListEl.innerHTML = `<div class="empty">暂无文件</div>`;
+                    return;
+                }
+
+                // 渲染列表
+                renderFileList(files, proxy);
+
+                setStatus(`✅ 成功加载 ${files.length} 个文件`, 'success');
+            } catch (err) {
+                console.error(err);
+                setStatus(`❌ 加载失败：${err.message}`, 'error');
+                fileListEl.innerHTML = `<div class="empty">加载失败，请检查网络或代理设置</div>`;
+            } finally {
+                refreshBtn.disabled = false;
+            }
+        }
+
+        // ===== 渲染文件列表 =====
+        function renderFileList(files, proxy) {
+            let html = '';
+            for (const file of files) {
+                // 下载链接：直接使用 raw 地址，如果启用了代理则加上代理前缀
+                const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${DIR_PATH}/${file.name}`;
+                let downloadUrl = rawUrl;
+                if (proxy) {
+                    // 代理前缀
+                    downloadUrl = proxy + rawUrl;
+                }
+
+                html += `
+                    <div class="file-item">
+                        <div class="info">
+                            <span class="name">📄 ${file.name}</span>
+                            <span class="size">${getFileSize(file)}</span>
+                        </div>
+                        <a href="${downloadUrl}" class="download-link" download target="_blank">⬇ 下载</a>
+                    </div>
+                `;
+            }
+            fileListEl.innerHTML = html;
+        }
+
+        // ===== 事件绑定 =====
+        refreshBtn.addEventListener('click', fetchFileList);
+
+        // 页面加载时自动刷新一次
+        window.addEventListener('load', fetchFileList);
+
+        // 可选：切换代理时自动刷新（取消注释下面代码即可启用）
+        // proxySelect.addEventListener('change', fetchFileList);
+
+        console.log('Cloud 文件下载器已启动');
+    })();
+</script>
+</body>
+</html>
