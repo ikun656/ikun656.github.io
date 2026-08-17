@@ -5,363 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>软件下载站</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ===== 原有样式 ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 40px 20px; color: #1e293b; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 30px 35px; }
+        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .sub { color: #64748b; font-size: 15px; margin-bottom: 25px; border-left: 4px solid #2563eb; padding-left: 14px; }
+        .control { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 25px; align-items: center; }
+        .control label { font-weight: 500; color: #334155; }
+        .control select { padding: 8px 16px; border: 2px solid #d1d9e6; border-radius: 8px; font-size: 14px; background: #fff; cursor: pointer; flex: 1; min-width: 200px; }
+        .control select:focus { outline: none; border-color: #2563eb; }
+        .btn { background: #2563eb; color: #fff; border: none; padding: 8px 24px; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; font-size: 15px; }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .status { margin: 10px 0 18px; padding: 10px 16px; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 14px; display: none; }
+        .status.show { display: block; }
+        .status.error { background: #fde8e8; color: #721c24; }
+        .status.success { background: #e6f9ed; color: #155724; }
+        .software-list { margin-top: 10px; }
+        .software-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #eef2f8; transition: background 0.15s; flex-wrap: wrap; gap: 12px; }
+        .software-item:hover { background: #fafcff; }
+        .software-item .info { flex: 1; min-width: 200px; }
+        .software-item .name { font-weight: 600; color: #0f172a; font-size: 17px; }
+        .software-item .desc { font-size: 14px; color: #64748b; margin-top: 2px; }
+        .software-item .version { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+        .software-item .actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .software-item .download-link { background: #2563eb; color: #fff; padding: 6px 18px; border-radius: 30px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s; white-space: nowrap; border: none; cursor: pointer; }
+        .software-item .download-link:hover { background: #1d4ed8; }
+        .software-item .note { font-size: 13px; color: #94a3b8; font-style: italic; }
+        .empty { text-align: center; color: #94a3b8; padding: 40px 0; }
+        .footer { margin-top: 30px; font-size: 13px; color: #94a3b8; text-align: center; border-top: 1px solid #eef2f8; padding-top: 20px; }
+        .tip { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: #475569; }
+
+        /* ===== 政策弹窗样式 ===== */
+        .policy-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f4f6f9;
-            padding: 40px 20px;
-            color: #1e293b;
+        .policy-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        .policy-card {
             background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            padding: 30px 35px;
+            max-width: 680px;
+            width: 90%;
+            max-height: 85vh;
+            border-radius: 24px;
+            padding: 32px 36px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s;
         }
-        h1 {
-            font-size: 28px;
-            margin-bottom: 6px;
+        .policy-overlay.show .policy-card {
+            transform: scale(1);
+        }
+        .policy-card h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #0f172a;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .sub {
-            color: #64748b;
+        .policy-card .policy-text {
             font-size: 15px;
-            margin-bottom: 25px;
-            border-left: 4px solid #2563eb;
-            padding-left: 14px;
-        }
-        .control {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 25px;
-            align-items: center;
-        }
-        .control label {
-            font-weight: 500;
+            line-height: 1.7;
             color: #334155;
-        }
-        .control select {
-            padding: 8px 16px;
-            border: 2px solid #d1d9e6;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fff;
-            cursor: pointer;
-            flex: 1;
-            min-width: 200px;
-        }
-        .control select:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-        .btn {
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 30px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 15px;
-        }
-        .btn:hover {
-            background: #1d4ed8;
-        }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .status {
-            margin: 10px 0 18px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            background: #f1f5f9;
-            color: #475569;
-            font-size: 14px;
-            display: none;
-        }
-        .status.show {
-            display: block;
-        }
-        .status.error {
-            background: #fde8e8;
-            color: #721c24;
-        }
-        .status.success {
-            background: #e6f9ed;
-            color: #155724;
-        }
-        .software-list {
-            margin-top: 10px;
-        }
-        .software-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 16px;
-            border-bottom: 1px solid #eef2f8;
-            transition: background 0.15s;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .software-item:hover {
-            background: #fafcff;
-        }
-        .software-item .info {
-            flex: 1;
-            min-width: 200px;
-        }
-        .software-item .name {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 17px;
-        }
-        .software-item .desc {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-        .software-item .version {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-        .software-item .actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        .software-item .download-link {
-            background: #2563eb;
-            color: #fff;
-            padding: 6px 18px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.2s;
-            white-space: nowrap;
-            border: none;
-            cursor: pointer;
-        }
-        .software-item .download-link:hover {
-            background: #1d4ed8;
-        }
-        .software-item .download-link.secondary {
-            background: #eef2f8;
-            color: #1e293b;
-        }
-        .software-item .download-link.secondary:hover {
-            background: #d5dce4;
-        }
-        .software-item .note {
-            font-size: 13px;
-            color: #94a3b8;
-            font-style: italic;
-        }
-        .empty {
-            text-align: center;
-            color: #94a3b8;
-            padding: 40px 0;
-        }
-        .footer {
-            margin-top: 30px;
-            font-size: 13px;
-            color: #94a3b8;
-            text-align: center;
-            border-top: 1px solid #eef2f8;
-            padding-top: 20px;
-        }
-        .footer a {
-            color: #2563eb;
-            text-decoration: none;
-        }
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        .tip {
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 12px 16px;
             margin-bottom: 20px;
-            font-size: 14px;
-            color: #475569;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid #eef2f8;
+            border-radius: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            max-height: 300px;
+            overflow-y: auto;
         }
-        .tip code {
-            background: #eef2f8;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 13px;
+        .policy-card .policy-text strong {
+            color: #2563eb;
+        }
+        .policy-card .btn-agree {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .policy-card .btn-agree:hover {
+            background: #1d4ed8;
+        }
+        @media (max-width: 480px) {
+            .policy-card { padding: 24px 20px; }
+            .policy-card h2 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>📦 软件下载站</h1>
-    <div class="sub">常用 Android 应用与工具 · 支持代理加速</div>
 
-    <div class="tip">
-        💡 <strong>提示：</strong> 列表中的下载链接可自行修改（在下方 JavaScript 的 <code>softwareList</code> 数组中编辑）。<br>
-        代理功能对 GitHub 资源有效，对清华源（<code>mirrors.tuna.tsinghua.edu.cn</code>）可能无需代理。
+    <!-- ===== 政策遮罩（与之前一致） ===== -->
+    <div class="policy-overlay" id="policyOverlay">
+        <div class="policy-card">
+            <h2>📋 请先同意政策</h2>
+            <div class="policy-text">
+                <strong>隐私政策</strong>
+                本工具站不会收集、存储或分享您的任何个人信息。所有功能均在浏览器本地运行，不涉及数据上传。您在使用过程中产生的任何数据仅保存在您的设备上。
+
+                <strong>开/闭源政策</strong>
+                本工具站代码（HTML/CSS/JavaScript）在 GitHub 上以公开方式托管，供学习参考。您可以根据个人需求对代码进行修改和二次开发，但不得用于商业用途或恶意传播。版权归原作者所有。
+            </div>
+            <button class="btn-agree" id="agreeBtn">同意并继续</button>
+        </div>
     </div>
 
-    <div class="control">
-        <label for="proxySelect">代理加速：</label>
-        <select id="proxySelect">
-            <option value="">不使用代理</option>
-            <option value="https://v4.gh-proxy.org/" selected>https://v4.gh-proxy.org/</option>
-            <option value="https://ghproxy.com/">https://ghproxy.com/</option>
-            <option value="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz/</option>
-            <option value="https://gh.ddlc.top/">https://gh.ddlc.top/</option>
-        </select>
-        <button class="btn" id="refreshBtn">🔄 刷新列表</button>
+    <!-- ===== 页面主体 ===== -->
+    <div class="container">
+        <h1>📦 软件下载站</h1>
+        <div class="sub">常用 Android 应用与工具 · 支持代理加速</div>
+        <div class="tip">💡 <strong>提示：</strong> 本列表由站长维护，软件版本和下载链接会持续更新。</div>
+
+        <div class="control">
+            <label for="proxySelect">代理加速：</label>
+            <select id="proxySelect">
+                <option value="">不使用代理</option>
+                <option value="https://v4.gh-proxy.org/" selected>https://v4.gh-proxy.org/</option>
+                <option value="https://ghproxy.com/">https://ghproxy.com/</option>
+                <option value="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz/</option>
+                <option value="https://gh.ddlc.top/">https://gh.ddlc.top/</option>
+            </select>
+            <button class="btn" id="refreshBtn">🔄 刷新列表</button>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="software-list" id="softwareList"></div>
+
+        <div class="footer">📌 列表由站长维护</div>
     </div>
 
-    <div class="status" id="status"></div>
+    <!-- ===== 引入独立的 policy.js ===== -->
+    <script src="/policy.js"></script>
 
-    <div class="software-list" id="softwareList">
-        <!-- 由 JavaScript 渲染 -->
-    </div>
+    <!-- ===== 原有业务 JS ===== -->
+    <script>
+        (function() {
+            'use strict';
 
-    <div class="footer">
-        <span>📌 列表可编辑 · <a href="#" onclick="window.location.reload();">刷新页面</a></span>
-    </div>
-</div>
+            // 原有软件列表
+            const softwareList = [
+                { name: 'F-Droid', desc: '自由开源软件应用商店客户端', version: 'v1.19.2 (1019052)', url: 'https://mirrors.tuna.tsinghua.edu.cn/fdroid/archive/org.fdroid.fdroid_1019052.apk', note: '清华源镜像' },
+                { name: 'Termux', desc: 'Android 上的终端模拟器及 Linux 环境', version: 'v0.118.0', url: 'https://f-droid.org/repo/com.termux_118.apk', note: '可通过 F-Droid 安装' },
+                { name: 'NewPipe', desc: '轻量级 YouTube 前端，无广告', version: 'v0.24.1', url: 'https://f-droid.org/repo/org.schabi.newpipe_101.apk', note: '开源替代' }
+            ];
 
-<script>
-    (function() {
-        'use strict';
+            const proxySelect = document.getElementById('proxySelect');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const statusEl = document.getElementById('status');
+            const listContainer = document.getElementById('softwareList');
 
-        // ============================================================
-        // ★★★ 在这里修改软件列表 ★★★
-        // 每个条目：{ name, desc, version?, url, note? }
-        //  - url: 直接下载链接（可以是 http/https）
-        //  - 如果 url 以 'gh:' 开头，则视为 GitHub 资源，会自动应用代理
-        //  - 否则原样使用
-        // ============================================================
-        const softwareList = [
-            {
-                name: 'F-Droid',
-                desc: '自由开源软件应用商店客户端',
-                version: 'v1.19.2 (1019052)',
-                url: 'https://mirrors.tuna.tsinghua.edu.cn/fdroid/archive/org.fdroid.fdroid_1019052.apk',
-                note: '清华源镜像'
-            },
-            {
-                name: 'Termux',
-                desc: 'Android 上的终端模拟器及 Linux 环境',
-                version: 'v0.118.0',
-                url: 'https://f-droid.org/repo/com.termux_118.apk',  // 官方 F-Droid 仓库（可替换为清华源）
-                note: '可通过 F-Droid 安装，或直接下载 APK'
-            },
-            {
-                name: 'NewPipe',
-                desc: '轻量级 YouTube 前端，无广告',
-                version: 'v0.24.1',
-                url: 'https://f-droid.org/repo/org.schabi.newpipe_101.apk',
-                note: '开源替代'
-            },
-            // 您可以在这里继续添加或删除条目
-            // 示例：
-            // {
-            //     name: 'VLC',
-            //     desc: '开源媒体播放器',
-            //     version: 'v3.5.4',
-            //     url: 'https://get.videolan.org/vlc-android/...',
-            //     note: '官网'
-            // }
-        ];
-
-        // ============================================================
-        // 以下代码为渲染与交互逻辑，一般无需修改
-        // ============================================================
-
-        const proxySelect = document.getElementById('proxySelect');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const statusEl = document.getElementById('status');
-        const listContainer = document.getElementById('softwareList');
-
-        function setStatus(msg, type) {
-            statusEl.textContent = msg;
-            statusEl.className = 'status show' + (type ? ' ' + type : '');
-        }
-
-        function hideStatus() {
-            statusEl.className = 'status';
-        }
-
-        // 应用代理
-        function applyProxy(url) {
-            const proxy = proxySelect.value.trim();
-            if (!proxy) return url;
-            // 如果 URL 是 GitHub 的 raw 或 api 或 f-droid 等，可以加代理，但这里简单判断是否以 http 开头且不是清华源
-            // 为了通用，直接在所有 URL 前加代理（可能对清华源无效，但无伤大雅）
-            // 但更好的做法：仅当 URL 包含 'github.com' 或 'raw.githubusercontent.com' 时才加代理
-            if (url.includes('github.com') || url.includes('raw.githubusercontent.com') || url.includes('githubusercontent.com')) {
-                return proxy + url;
-            }
-            // 其他 URL（如清华源）不加代理，否则可能破坏链接
-            return url;
-        }
-
-        function renderList() {
-            if (softwareList.length === 0) {
-                listContainer.innerHTML = `<div class="empty">暂无软件，请添加条目</div>`;
-                return;
+            function setStatus(msg, type) {
+                statusEl.textContent = msg;
+                statusEl.className = 'status show' + (type ? ' ' + type : '');
             }
 
-            let html = '';
-            for (const item of softwareList) {
-                const displayUrl = applyProxy(item.url);
-                const noteHtml = item.note ? `<span class="note">${item.note}</span>` : '';
-                const versionHtml = item.version ? `<div class="version">📌 ${item.version}</div>` : '';
+            function applyProxy(url) {
+                const proxy = proxySelect.value.trim();
+                if (!proxy) return url;
+                if (url.includes('github.com') || url.includes('raw.githubusercontent.com') || url.includes('githubusercontent.com')) {
+                    return proxy + url;
+                }
+                return url;
+            }
 
-                html += `
-                    <div class="software-item">
-                        <div class="info">
-                            <div class="name">${item.name}</div>
-                            <div class="desc">${item.desc}</div>
-                            ${versionHtml}
-                            ${noteHtml}
+            function renderList() {
+                if (softwareList.length === 0) {
+                    listContainer.innerHTML = `<div class="empty">暂无软件</div>`;
+                    return;
+                }
+                let html = '';
+                for (const item of softwareList) {
+                    const displayUrl = applyProxy(item.url);
+                    const noteHtml = item.note ? `<span class="note">${item.note}</span>` : '';
+                    const versionHtml = item.version ? `<div class="version">📌 ${item.version}</div>` : '';
+                    html += `
+                        <div class="software-item">
+                            <div class="info">
+                                <div class="name">${item.name}</div>
+                                <div class="desc">${item.desc}</div>
+                                ${versionHtml}
+                                ${noteHtml}
+                            </div>
+                            <div class="actions">
+                                <a href="${displayUrl}" class="download-link" download target="_blank">⬇ 下载</a>
+                            </div>
                         </div>
-                        <div class="actions">
-                            <a href="${displayUrl}" class="download-link" download target="_blank">⬇ 下载</a>
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
+                listContainer.innerHTML = html;
+                setStatus(`✅ 已加载 ${softwareList.length} 个软件`, 'success');
             }
-            listContainer.innerHTML = html;
-            setStatus(`✅ 已加载 ${softwareList.length} 个软件`, 'success');
-        }
 
-        // 刷新按钮
-        refreshBtn.addEventListener('click', function() {
-            renderList();
-        });
-
-        // 代理切换时重新渲染（以应用新代理）
-        proxySelect.addEventListener('change', function() {
-            renderList();
-        });
-
-        // 页面加载时渲染
-        window.addEventListener('load', function() {
-            renderList();
-        });
-
-        console.log('软件下载站已启动');
-    })();
-</script>
+            refreshBtn.addEventListener('click', renderList);
+            proxySelect.addEventListener('change', renderList);
+            window.addEventListener('load', renderList);
+            console.log('软件下载站已启动 (政策由 policy.js 管理)');
+        })();
+    </script>
 </body>
 </html>
