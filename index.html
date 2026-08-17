@@ -42,7 +42,7 @@
         /* ===== JSON 工具 ===== */
         .json-tool-area { margin: 16px 0; }
         .json-tool-area textarea { width: 100%; height: 200px; padding: 12px; border: 2px solid #d1d9e6; border-radius: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; resize: vertical; transition: border 0.2s; background: #ffffff; }
-        .json-tool-area textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .json-tool-area textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         .json-tool-area .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
         .json-tool-area .btn-group .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; background: #eef2f8; color: #1e293b; }
         .json-tool-area .btn-group .btn:hover { background: #d5dce4; }
@@ -57,26 +57,6 @@
         .json-tool-area .status-msg { font-size: 14px; color: #475569; margin: 6px 0 4px; }
         .json-tool-area .status-msg.error { color: #dc3545; }
         .json-tool-area .status-msg.success { color: #28a745; }
-
-        /* ===== 响应式 ===== */
-        @media (max-width: 768px) {
-            body { flex-direction: column; height: auto; overflow: auto; }
-            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e9edf4; padding: 16px 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-            .sidebar .brand { padding: 0 16px 0 20px; border-bottom: none; margin-bottom: 0; flex: 1; }
-            .sidebar .brand .logo { font-size: 22px; }
-            .sidebar .nav-list { display: flex; flex-wrap: wrap; padding: 8px 12px 0; gap: 4px; flex: 1 1 100%; }
-            .sidebar .nav-list li { padding: 8px 14px; font-size: 14px; margin-bottom: 0; border-radius: 30px; background: #f8fafc; }
-            .sidebar .nav-list li.active { background: #eef2ff; }
-            .sidebar .nav-list li .nav-icon { font-size: 16px; width: 22px; }
-            .sidebar .footer-nav { display: none; }
-            .main { padding: 24px 20px; height: auto; overflow: auto; }
-            .main .page h2 { font-size: 24px; }
-        }
-        @media (max-width: 480px) {
-            .sidebar .nav-list li { font-size: 13px; padding: 6px 12px; }
-            .main .page .btn-primary { width: 100%; text-align: center; }
-            .json-tool-area .btn-group .btn { flex: 1; min-width: 80px; text-align: center; }
-        }
 
         /* ===== 政策弹窗样式 ===== */
         .policy-overlay {
@@ -151,19 +131,35 @@
         .policy-card .btn-agree:hover {
             background: #1d4ed8;
         }
-        .policy-card .btn-agree:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
         @media (max-width: 480px) {
             .policy-card { padding: 24px 20px; }
             .policy-card h2 { font-size: 20px; }
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e9edf4; padding: 16px 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+            .sidebar .brand { padding: 0 16px 0 20px; border-bottom: none; margin-bottom: 0; flex: 1; }
+            .sidebar .brand .logo { font-size: 22px; }
+            .sidebar .nav-list { display: flex; flex-wrap: wrap; padding: 8px 12px 0; gap: 4px; flex: 1 1 100%; }
+            .sidebar .nav-list li { padding: 8px 14px; font-size: 14px; margin-bottom: 0; border-radius: 30px; background: #f8fafc; }
+            .sidebar .nav-list li.active { background: #eef2ff; }
+            .sidebar .nav-list li .nav-icon { font-size: 16px; width: 22px; }
+            .sidebar .footer-nav { display: none; }
+            .main { padding: 24px 20px; height: auto; overflow: auto; }
+            .main .page h2 { font-size: 24px; }
+        }
+        @media (max-width: 480px) {
+            .sidebar .nav-list li { font-size: 13px; padding: 6px 12px; }
+            .main .page .btn-primary { width: 100%; text-align: center; }
+            .json-tool-area .btn-group .btn { flex: 1; min-width: 80px; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== 政策遮罩弹窗 ===== -->
+    <!-- ===== 政策遮罩 ===== -->
     <div class="policy-overlay" id="policyOverlay">
         <div class="policy-card">
             <h2>📋 请先同意政策</h2>
@@ -261,34 +257,10 @@
         </div>
     </main>
 
+    <script src="/policy.js"></script>
     <script>
         (function() {
             'use strict';
-
-            // ===== 政策同意逻辑 =====
-            function setCookie(name, value, days) {
-                const d = new Date();
-                d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-                document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
-            }
-            function getCookie(name) {
-                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                return match ? match[2] : null;
-            }
-
-            const overlay = document.getElementById('policyOverlay');
-            const agreeBtn = document.getElementById('agreeBtn');
-
-            if (getCookie('policy_agreed') === 'true') {
-                overlay.classList.remove('show');
-            } else {
-                overlay.classList.add('show');
-            }
-
-            agreeBtn.addEventListener('click', function() {
-                setCookie('policy_agreed', 'true', 365);
-                overlay.classList.remove('show');
-            });
 
             // ===== 导航切换 =====
             const navItems = document.querySelectorAll('#navList li');
@@ -375,9 +347,8 @@
             btnClear.addEventListener('click', function() { inputEl.value = ''; hideResult(); setStatus('已清空', ''); });
 
             window.addEventListener('load', function() { setStatus('输入 JSON 数据，点击按钮操作', ''); hideResult(); });
-            console.log('ikun656 工具站已启动 (含政策同意)');
+            console.log('ikun656 工具站已启动 (政策由 policy.js 管理)');
         })();
     </script>
-
 </body>
 </html>
