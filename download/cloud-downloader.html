@@ -205,8 +205,8 @@
     <div class="sub">列出 <code>cloud</code> 目录下的所有文件，支持代理加速下载</div>
 
     <div class="tip">
-        💡 <strong>代理说明：</strong> 代理仅用于文件下载加速，获取文件列表时始终直连。<br>
-        🔽 点击「下载文件」按钮可强制弹出下载对话框（支持代理加速）。
+        💡 <strong>下载说明：</strong> 点击「下载文件」按钮会强制弹出下载对话框。<br>
+        🔗 若下载未自动开始，请点击「直连」在新窗口打开，然后右键另存为。
     </div>
 
     <div class="control">
@@ -305,36 +305,39 @@
             }
         }
 
-        // ===== 下载函数（强制下载） =====
-        async function downloadFile(url, filename) {
+        // ===== 下载函数（多重保障） =====
+        function downloadFile(url, filename) {
             const proxy = proxySelect.value.trim();
             let targetUrl = url;
             if (proxy) {
                 targetUrl = proxy + url;
             }
 
-            try {
-                // 显示下载中状态（可更新按钮文字，但此处在按钮事件中处理）
-                const response = await fetch(targetUrl);
-                if (!response.ok) {
-                    throw new Error(`下载失败 (HTTP ${response.status})`);
-                }
-                const blob = await response.blob();
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-                return true;
-            } catch (err) {
-                console.error('下载失败:', err);
-                // 降级：直接打开链接（可能预览，但总比失败好）
-                window.open(targetUrl, '_blank');
-                return false;
-            }
+            // 方案1：使用 fetch + Blob 强制下载
+            // 注意：必须在用户手势中调用，否则浏览器会阻止弹窗
+            fetch(targetUrl, { mode: 'cors' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    // 延迟释放 URL
+                    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+                })
+                .catch(err => {
+                    console.warn('Fetch 下载失败，降级到 window.open:', err);
+                    // 方案2：降级 — 在新窗口打开（用户可右键另存为）
+                    window.open(targetUrl, '_blank');
+                });
         }
 
         // ===== 渲染文件列表 =====
@@ -342,18 +345,16 @@
             let html = '';
             for (const file of files) {
                 const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${DIR_PATH}/${file.name}`;
-                // 直接链接（用于复制或备用）
-                const directUrl = rawUrl; // 不经过代理，直接显示
 
                 html += `
-                    <div class="file-item" data-raw="${rawUrl}" data-filename="${file.name}">
+                    <div class="file-item">
                         <div class="info">
                             <span class="name">📄 ${file.name}</span>
                             <span class="size">${getFileSize(file)}</span>
                         </div>
                         <div class="actions">
                             <button class="download-btn" data-url="${rawUrl}" data-filename="${file.name}">⬇ 下载文件</button>
-                            <a href="${rawUrl}" class="direct-link" target="_blank" title="直接打开（可能预览）">🔗 直连</a>
+                            <a href="${rawUrl}" class="direct-link" target="_blank" title="直接打开（可右键另存为）">🔗 直连</a>
                         </div>
                     </div>
                 `;
@@ -362,21 +363,19 @@
 
             // 绑定下载按钮事件
             document.querySelectorAll('.file-item .download-btn').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
+                btn.addEventListener('click', function(e) {
                     const url = this.dataset.url;
                     const filename = this.dataset.filename;
                     const originalText = this.textContent;
                     this.disabled = true;
                     this.textContent = '⏳ 下载中...';
-                    try {
-                        await downloadFile(url, filename);
-                        // 下载成功后恢复按钮（但可能已跳转，无需恢复）
-                    } catch (err) {
-                        console.error(err);
-                    } finally {
+                    // 调用下载函数（注意：它在内部处理异步，但无需 await）
+                    downloadFile(url, filename);
+                    // 恢复按钮（延迟恢复，给用户视觉反馈）
+                    setTimeout(() => {
                         this.disabled = false;
                         this.textContent = originalText;
-                    }
+                    }, 3000);
                 });
             });
         }
@@ -386,14 +385,13 @@
 
         // 代理切换时重新获取列表（刷新下载链接）
         proxySelect.addEventListener('change', function() {
-            // 重新请求列表（因为渲染时未使用代理，代理只在下载时应用，所以只需重新渲染即可，但为了统一，重新获取）
             fetchFileList();
         });
 
         // 页面加载时自动刷新
         window.addEventListener('load', fetchFileList);
 
-        console.log('Cloud 文件下载器已启动（强制下载 + 代理加速）');
+        console.log('Cloud 文件下载器已启动（强制下载 + 降级保障）');
     })();
 </script>
 </body>
