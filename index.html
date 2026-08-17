@@ -397,6 +397,12 @@
             <li data-page="vsix">
                 <span class="nav-icon">⬇️</span> VSIX 下载加速器
             </li>
+            <li data-page="cloud">
+                <span class="nav-icon">📂</span> Cloud 文件下载
+            </li>
+            <li data-page="software">
+                <span class="nav-icon">📦</span> 软件下载站
+            </li>
             <li data-page="json">
                 <span class="nav-icon">📋</span> JSON 格式化器
             </li>
@@ -437,6 +443,36 @@
             </div>
             <div class="page-meta">📦 适用场景：VS Code 扩展离线安装、企业内网分发</div>
             <a href="./vsix-downloader/vsix.html" class="btn-primary">
+                前往使用 <span class="arrow">→</span>
+            </a>
+        </div>
+
+        <!-- 页面：Cloud 文件下载 -->
+        <div class="page" id="page-cloud">
+            <div class="page-icon">📂</div>
+            <h2>Cloud 文件下载</h2>
+            <div class="status-badge">✅ 已上线</div>
+            <div class="page-desc">
+                列出仓库 <code>cloud</code> 目录下的所有文件，支持代理加速下载。<br />
+                适合分享安装包、配置文件等静态资源，一键获取下载链接。
+            </div>
+            <div class="page-meta">📁 目录：/cloud · 支持 GitHub 代理加速</div>
+            <a href="./download/cloud-downloader.html" class="btn-primary">
+                前往使用 <span class="arrow">→</span>
+            </a>
+        </div>
+
+        <!-- 页面：软件下载站 -->
+        <div class="page" id="page-software">
+            <div class="page-icon">📦</div>
+            <h2>软件下载站</h2>
+            <div class="status-badge">✅ 已上线</div>
+            <div class="page-desc">
+                常用 Android 应用与工具下载集合，支持代理加速。<br />
+                预置 F-Droid、Termux 等软件，可自行增删或修改下载链接。
+            </div>
+            <div class="page-meta">📌 列表可编辑 · 支持清华源镜像</div>
+            <a href="./download/software-downloader.html" class="btn-primary">
                 前往使用 <span class="arrow">→</span>
             </a>
         </div>
@@ -494,6 +530,8 @@
             const pages = {
                 home: document.getElementById('page-home'),
                 vsix: document.getElementById('page-vsix'),
+                cloud: document.getElementById('page-cloud'),
+                software: document.getElementById('page-software'),
                 json: document.getElementById('page-json'),
                 more: document.getElementById('page-more')
             };
@@ -616,13 +654,13 @@
                 setStatus('已清空', '');
             });
 
-            // 初始自动格式化示例（可选）
+            // 初始状态
             window.addEventListener('load', function() {
                 setStatus('输入 JSON 数据，点击按钮操作', '');
                 hideResult();
             });
 
-            console.log('ikun656 工具站已启动 (含 JSON 工具)');
+            console.log('ikun656 工具站已启动 (含 Cloud 和 软件下载站)');
         })();
     </script>
 
