@@ -1,0 +1,25 @@
+{
+  "brand": "ikun656",
+  "brandSub": "工具站 · 轻量实用",
+  "footer": "© 2026 ikun656 · 保留所有权利",
+  "announce": {
+    "enabled": false,
+    "text": ""
+  },
+  "nav": [
+    { "page": "home", "label": "站点介绍", "icon": "house" },
+    { "page": "vsix", "label": "VSIX 下载加速器", "icon": "download" },
+    { "page": "cloud", "label": "Cloud 文件下载", "icon": "folder" },
+    { "page": "software", "label": "软件下载站", "icon": "package" },
+    { "page": "json", "label": "JSON 格式化器", "icon": "braces" },
+    { "page": "more", "label": "更多工具", "icon": "ellipsis" }
+  ],
+  "pages": {
+    "home": { "title": "ikun656 的工具站", "desc": "我平时用得上的几个小工具，凑一起方便自己也分享出来。左边挑一个就能用，都在浏览器里跑，不用装东西。", "meta": "随手维护 · 纯前端" },
+    "vsix": { "title": "VSIX 下载加速器", "desc": "从 VS Code 插件市场把扩展的 VSIX 安装包拉下来，可以选版本、复制下载链接。", "meta": "适合离线安装、内网环境" },
+    "cloud": { "title": "Cloud 文件下载", "desc": "列出这个仓库 cloud 目录里的文件，可以走代理加速下载。", "meta": "目录：/cloud" },
+    "software": { "title": "软件下载站", "desc": "几个常用的 Android 应用下载入口，支持代理加速，预置了 F-Droid、Termux 之类。", "meta": "支持清华源镜像" },
+    "json": { "title": "JSON 格式化器", "desc": "把 JSON 粘进来，格式化、压缩、校验都行。", "meta": "全程在浏览器里跑，不上传任何数据" },
+    "more": { "title": "更多工具", "desc": "暂时就这些，想到好用的会再往上加。", "meta": "有想法也可以来提建议" }
+  }
+}

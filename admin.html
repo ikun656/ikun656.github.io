@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 · ikun656 工具站</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f1f4f9; color: #1e293b; margin: 0; padding: 32px; }
+  .wrap { max-width: 760px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 28px 32px; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin: 14px 0 6px; }
+  input[type=text], input[type=password], textarea, select { width: 100%; padding: 10px 12px; border: 2px solid #d1d9e6; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+  textarea { resize: vertical; min-height: 64px; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+  .card { border: 1px solid #e9edf4; border-radius: 12px; padding: 16px; margin: 14px 0; background: #fafcff; }
+  .card h2 { font-size: 16px; margin: 0 0 10px; }
+  .nav-item { border: 1px solid #e9edf4; border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fff; }
+  .nav-item .line { display: flex; gap: 8px; align-items: center; }
+  .nav-item .line > div { flex: 1; }
+  .mini-btn { border: none; background: #eef2f8; color: #334155; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 13px; }
+  .mini-btn:hover { background: #d5dce4; }
+  .mini-btn.danger { background: #fde8e8; color: #dc3545; }
+  .btn-primary { background: #2563eb; color: #fff; border: none; padding: 12px 24px; border-radius: 40px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost { background: #eef2f8; color: #1e293b; border: none; padding: 12px 24px; border-radius: 40px; font-size: 15px; font-weight: 600; cursor: pointer; margin-left: 10px; }
+  .status { margin-top: 14px; font-size: 14px; padding: 10px 14px; border-radius: 8px; display: none; line-height: 1.6; }
+  .status.ok { display: block; background: #e7f6ec; color: #1e7e34; }
+  .status.err { display: block; background: #fde8e8; color: #dc3545; }
+  .status.info { display: block; background: #eef2ff; color: #2563eb; }
+  .hide { display: none; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .hint { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+  .inline-check { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 400; color: #475569; }
+  .inline-check input { width: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== 登录 ===== -->
+  <div id="loginView">
+    <h1>后台管理</h1>
+    <div class="sub">请输入管理密码进入</div>
+    <label for="passInput">管理密码</label>
+    <input type="password" id="passInput" placeholder="管理密码" autocomplete="off">
+    <div style="margin-top:14px;">
+      <button class="btn-primary" id="loginBtn">进入</button>
+    </div>
+    <p class="hint" style="margin-top:16px;">默认密码 <code>ikun6562026</code>。更换方法：编辑 admin.html 顶部的 <code>ADMIN_HASH</code>（用 SHA-256 重新计算新密码填入）。</p>
+  </div>
+
+  <!-- ===== 管理 ===== -->
+  <div id="adminView" class="hide">
+    <h1>站点内容管理</h1>
+    <div class="sub">修改后点“保存更改”，GitHub Pages 会在几分钟内自动更新</div>
+
+    <div class="card">
+      <h2>GitHub 写令牌</h2>
+      <label for="tokenInput">Personal Access Token（需 repo / contents:write 权限）</label>
+      <input type="password" id="tokenInput" placeholder="ghp_xxx 或 github_pat_xxx" autocomplete="off">
+      <div class="line" style="display:flex; gap:12px; align-items:center; margin-top:10px;">
+        <label class="inline-check"><input type="checkbox" id="rememberToken"> 记住此令牌（仅存本机浏览器）</label>
+        <button class="btn-primary" id="loadBtn">加载站点内容</button>
+      </div>
+      <p class="hint">令牌只在你的浏览器里用于调用 GitHub API 写回 content.json，不会发往其他任何地方。建议使用仅限本仓库的细粒度令牌，且不要勾选“记住”在公共电脑上。</p>
+    </div>
+
+    <div id="formArea" class="hide">
+      <div class="card">
+        <h2>基础信息</h2>
+        <label for="f_brand">站点名称（品牌）</label>
+        <input type="text" id="f_brand">
+        <label for="f_sub">副标题</label>
+        <input type="text" id="f_sub">
+        <label for="f_footer">页脚版权</label>
+        <input type="text" id="f_footer">
+      </div>
+
+      <div class="card">
+        <h2>顶部公告</h2>
+        <label class="inline-check"><input type="checkbox" id="f_announce_on"> 启用公告横幅</label>
+        <label for="f_announce_text">公告内容</label>
+        <textarea id="f_announce_text" placeholder="例如：新工具上线啦！"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>导航菜单</h2>
+        <div id="navListEdit"></div>
+        <button class="mini-btn" id="addNavBtn">+ 添加导航项</button>
+        <p class="hint">“页面 key”对应下方各页面设置，新增项默认 key 为 itemN，若下方没有对应页面则点击后无内容。</p>
+      </div>
+
+      <div class="card">
+        <h2>各页面内容</h2>
+        <div id="pagesEdit"></div>
+      </div>
+
+      <div>
+        <button class="btn-primary" id="saveBtn">保存更改</button>
+        <button class="btn-ghost" id="logoutBtn">退出</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var REPO = 'ikun656/ikun656.github.io';
+  // 默认密码 ikun6562026 的 SHA-256，修改密码时替换此值（用 SHA-256 重新计算）
+  var ADMIN_HASH = 'ed1b0eae7546ec86ceff9e378a0eb19e549780984fec279abc6c3ff31fc68e56';
+  var ICONS = ['house','download','folder','package','braces','ellipsis','search','copy','globe','refresh-cw','link','trash-2','check','minimize','sparkles','file-text'];
+  var PAGE_KEYS = ['home','vsix','cloud','software','json','more'];
+
+  var loginView = document.getElementById('loginView');
+  var adminView = document.getElementById('adminView');
+  var formArea = document.getElementById('formArea');
+  var statusEl = document.getElementById('status');
+  var tokenInput = document.getElementById('tokenInput');
+  var navListEdit = document.getElementById('navListEdit');
+  var pagesEdit = document.getElementById('pagesEdit');
+
+  var currentToken = '';
+  var currentSha = '';
+  var navData = [];
+
+  function $(id) { return document.getElementById(id); }
+  function val(id) { var e = $(id); return e ? e.value : ''; }
+  function setVal(id, v) { var e = $(id); if (e) e.value = (v == null ? '' : v); }
+
+  function sha256(s) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function (d) {
+      return Array.from(new Uint8Array(d)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+
+  function showStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (type ? (' ' + type) : '');
+  }
+
+  // ===== 登录 =====
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    var p = $('passInput').value;
+    if (!p) { alert('请输入管理密码'); return; }
+    sha256(p).then(function (h) {
+      if (h === ADMIN_HASH) {
+        loginView.classList.add('hide');
+        adminView.classList.remove('hide');
+        var saved = localStorage.getItem('cms_token');
+        if (saved) {
+          tokenInput.value = saved;
+          $('rememberToken').checked = true;
+          showStatus('已读取本机保存的令牌，可点“加载站点内容”。', 'info');
+        }
+      } else {
+        alert('密码错误');
+      }
+    });
+  });
+
+  // ===== 加载 =====
+  document.getElementById('loadBtn').addEventListener('click', function () {
+    var t = tokenInput.value.trim();
+    if (!t) { alert('请先填写 GitHub 写令牌'); return; }
+    currentToken = t;
+    if ($('rememberToken').checked) { localStorage.setItem('cms_token', t); }
+    else { localStorage.removeItem('cms_token'); }
+    showStatus('正在加载 content.json …', 'info');
+    fetch('https://api.github.com/repos/' + REPO + '/contents/content.json', {
+      headers: { 'Authorization': 'token ' + t, 'Accept': 'application/vnd.github+json' }
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      currentSha = j.sha;
+      var data = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+      fillForm(data);
+      formArea.classList.remove('hide');
+      showStatus('已加载，修改后点“保存更改”。', 'ok');
+    }).catch(function (e) {
+      showStatus('加载失败：' + e.message + '（请检查令牌权限，需可读取本仓库内容）', 'err');
+    });
+  });
+
+  function fillForm(data) {
+    setVal('f_brand', data.brand);
+    setVal('f_sub', data.brandSub);
+    setVal('f_footer', data.footer);
+    $('f_announce_on').checked = !!(data.announce && data.announce.enabled);
+    setVal('f_announce_text', data.announce ? data.announce.text : '');
+    navData = (data.nav || []).map(function (n) { return { page: n.page, label: n.label, icon: n.icon }; });
+    renderNavEdit();
+    renderPagesEdit(data.pages || {});
+  }
+
+  function renderNavEdit() {
+    navListEdit.innerHTML = '';
+    navData.forEach(function (item, idx) {
+      var box = document.createElement('div');
+      box.className = 'nav-item';
+      var opts = ICONS.map(function (ic) {
+        return '<option value="' + ic + '"' + (ic === item.icon ? ' selected' : '') + '>' + ic + '</option>';
+      }).join('');
+      box.innerHTML =
+        '<div class="line">' +
+          '<div><input type="text" data-k="label" data-i="' + idx + '" value="' + escapeAttr(item.label) + '" placeholder="菜单名称"></div>' +
+          '<div style="flex:0 0 150px;"><select data-k="icon" data-i="' + idx + '">' + opts + '</select></div>' +
+        '</div>' +
+        '<div class="line" style="margin-top:8px;">' +
+          '<span class="hint">页面 key：<code>' + escapeHtml(item.page) + '</code></span>' +
+          '<span style="margin-left:auto;display:flex;gap:6px;">' +
+            '<button class="mini-btn" data-act="up" data-i="' + idx + '">↑</button>' +
+            '<button class="mini-btn" data-act="down" data-i="' + idx + '">↓</button>' +
+            '<button class="mini-btn danger" data-act="del" data-i="' + idx + '">删除</button>' +
+          '</span>' +
+        '</div>';
+      navListEdit.appendChild(box);
+    });
+    bindNavInputs();
+  }
+
+  function bindNavInputs() {
+    navListEdit.querySelectorAll('input[data-k],select[data-k]').forEach(function (inp) {
+      function update() { navData[+inp.dataset.i][inp.dataset.k] = inp.value; }
+      inp.addEventListener('input', update);
+      inp.addEventListener('change', update);
+    });
+    navListEdit.querySelectorAll('button[data-act]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = +btn.dataset.i, act = btn.dataset.act;
+        if (act === 'del') { navData.splice(i, 1); }
+        else if (act === 'up' && i > 0) { var t = navData[i]; navData[i] = navData[i - 1]; navData[i - 1] = t; }
+        else if (act === 'down' && i < navData.length - 1) { var t2 = navData[i]; navData[i] = navData[i + 1]; navData[i + 1] = t2; }
+        renderNavEdit();
+      });
+    });
+  }
+
+  document.getElementById('addNavBtn').addEventListener('click', function () {
+    navData.push({ page: 'item' + (navData.length + 1), label: '新菜单', icon: 'ellipsis' });
+    renderNavEdit();
+  });
+
+  function renderPagesEdit(pages) {
+    pagesEdit.innerHTML = '';
+    PAGE_KEYS.forEach(function (k) {
+      var p = pages[k] || {};
+      var box = document.createElement('div');
+      box.className = 'nav-item';
+      box.innerHTML =
+        '<div class="hint" style="margin-bottom:6px;">页面 key：<code>' + k + '</code></div>' +
+        '<label>标题</label><input type="text" id="p_' + k + '_title" value="' + escapeAttr(p.title) + '">' +
+        '<label>描述</label><textarea id="p_' + k + '_desc">' + escapeHtml(p.desc || '') + '</textarea>' +
+        '<label>小字（meta）</label><input type="text" id="p_' + k + '_meta" value="' + escapeAttr(p.meta) + '">';
+      pagesEdit.appendChild(box);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  // ===== 收集 =====
+  function collect() {
+    var data = {};
+    data.brand = val('f_brand');
+    data.brandSub = val('f_sub');
+    data.footer = val('f_footer');
+    data.announce = { enabled: $('f_announce_on').checked, text: val('f_announce_text') };
+    data.nav = navData.map(function (n) { return { page: n.page, label: n.label, icon: n.icon }; });
+    data.pages = {};
+    PAGE_KEYS.forEach(function (k) {
+      data.pages[k] = { title: val('p_' + k + '_title'), desc: val('p_' + k + '_desc'), meta: val('p_' + k + '_meta') };
+    });
+    return data;
+  }
+
+  // ===== 保存 =====
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    if (!currentToken) { alert('请先填写令牌并加载内容'); return; }
+    if (!currentSha) { alert('请先点“加载站点内容”获取文件版本'); return; }
+    var data = collect();
+    var body = JSON.stringify(data, null, 2);
+    var content = btoa(unescape(encodeURIComponent(body)));
+    showStatus('正在保存…', 'info');
+    fetch('https://api.github.com/repos/' + REPO + '/contents/content.json', {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + currentToken,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: 'site: update content via admin', content: content, sha: currentSha })
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function () { showStatus('保存成功！GitHub Pages 将在几分钟内重新发布，刷新前台即可看到。', 'ok'); })
+      .catch(function (e) { showStatus('保存失败：' + e.message + '（需有写权限的令牌；若 401/403 请检查令牌范围）', 'err'); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    adminView.classList.add('hide');
+    formArea.classList.add('hide');
+    loginView.classList.remove('hide');
+    $('passInput').value = '';
+  });
+})();
+</script>
+</body>
+</html>
