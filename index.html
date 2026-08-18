@@ -12,8 +12,8 @@
         /* ===== 左侧导航 ===== */
         .sidebar { width: 240px; background: #ffffff; border-right: 1px solid #e9edf4; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; padding: 24px 0; overflow-y: auto; }
         .sidebar .brand { padding: 0 20px 20px 20px; border-bottom: 1px solid #eef2f8; margin-bottom: 16px; }
-        .sidebar .brand .logo { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: flex; align-items: center; gap: 8px; }
-        .sidebar .brand .logo img { width: 28px; height: 28px; object-fit: cover; border-radius: 6px; vertical-align: middle; background: none; -webkit-text-fill-color: initial; }
+        .sidebar .brand .logo { font-size: 28px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .sidebar .brand .logo img { width: 28px; height: 28px; object-fit: cover; border-radius: 6px; vertical-align: middle; }
         .sidebar .brand .sub { font-size: 13px; color: #94a3b8; margin-top: 4px; }
         .sidebar .nav-list { list-style: none; padding: 0 12px; flex: 1; }
         .sidebar .nav-list li { padding: 12px 16px; border-radius: 12px; margin-bottom: 4px; cursor: pointer; font-size: 15px; font-weight: 500; color: #334155; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
@@ -27,7 +27,6 @@
         .main .page { display: none; max-width: 820px; width: 100%; }
         .main .page.active { display: block; animation: fadeUp 0.25s ease; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .main .page .page-icon { font-size: 48px; margin-bottom: 12px; }
         .main .page h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
         .main .page .page-desc { font-size: 16px; line-height: 1.7; color: #475569; margin-bottom: 24px; }
         .main .page .page-meta { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
@@ -37,7 +36,6 @@
         .main .page .btn-primary:hover .arrow { transform: translateX(4px); }
         .main .page .btn-secondary { background: #e9edf4; color: #1e293b; margin-left: 12px; }
         .main .page .btn-secondary:hover { background: #d5dce4; }
-        .main .page .status-badge { display: inline-block; background: #dbeafe; color: #2563eb; font-size: 13px; font-weight: 500; padding: 4px 14px; border-radius: 30px; margin-bottom: 16px; }
 
         /* ===== JSON 工具 ===== */
         .json-tool-area { margin: 16px 0; }
@@ -194,47 +192,37 @@
     <main class="main" id="mainContent">
         <!-- 首页 -->
         <div class="page active" id="page-home">
-            <div class="page-icon">🚀</div>
-            <h2>欢迎来到 ikun656 工具站</h2>
-            <div class="page-desc">这里收集了一些实用在线小工具，全部免费、轻量、无需注册。点击左侧菜单即可切换。</div>
-            <div class="page-meta">📅 持续更新 · 个人作品</div>
-            <a href="#" class="btn-primary" style="background:#94a3b8; cursor:default;">了解详情 <span class="arrow">→</span></a>
+            <h2>ikun656 的工具站</h2>
+            <div class="page-desc">我平时用得上的几个小工具，凑一起方便自己也分享出来。左边挑一个就能用，都在浏览器里跑，不用装东西。</div>
+            <div class="page-meta">随手维护 · 纯前端</div>
         </div>
         <!-- VSIX -->
         <div class="page" id="page-vsix">
-            <div class="page-icon">⬇️</div>
             <h2>VSIX 下载加速器</h2>
-            <div class="status-badge">✅ 已上线</div>
-            <div class="page-desc">从 Visual Studio Marketplace 快速获取扩展的 VSIX 安装包。<br />支持版本选择、复制下载链接。</div>
-            <div class="page-meta">📦 适用场景：VS Code 扩展离线安装</div>
+            <div class="page-desc">从 VS Code 插件市场把扩展的 VSIX 安装包拉下来，可以选版本、复制下载链接。</div>
+            <div class="page-meta">适合离线安装、内网环境</div>
             <a href="./vsix-downloader/vsix.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
         </div>
         <!-- Cloud -->
         <div class="page" id="page-cloud">
-            <div class="page-icon">📂</div>
             <h2>Cloud 文件下载</h2>
-            <div class="status-badge">✅ 已上线</div>
-            <div class="page-desc">列出仓库 <code>cloud</code> 目录下的所有文件，支持代理加速下载。</div>
-            <div class="page-meta">📁 目录：/cloud · 支持 GitHub 代理加速</div>
+            <div class="page-desc">列出这个仓库 <code>cloud</code> 目录里的文件，可以走代理加速下载。</div>
+            <div class="page-meta">目录：/cloud</div>
             <a href="./download/cloud-downloader.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
         </div>
         <!-- 软件 -->
         <div class="page" id="page-software">
-            <div class="page-icon">📦</div>
             <h2>软件下载站</h2>
-            <div class="status-badge">✅ 已上线</div>
-            <div class="page-desc">常用 Android 应用与工具下载集合，支持代理加速。<br />预置 F-Droid、Termux 等常用软件。</div>
-            <div class="page-meta">📌 支持清华源镜像</div>
+            <div class="page-desc">几个常用的 Android 应用下载入口，支持代理加速，预置了 F-Droid、Termux 之类。</div>
+            <div class="page-meta">支持清华源镜像</div>
             <a href="./download/software-downloader.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
         </div>
         <!-- JSON -->
         <div class="page" id="page-json">
-            <div class="page-icon">📋</div>
             <h2>JSON 格式化器</h2>
-            <div class="status-badge">✅ 在线工具</div>
-            <div class="page-desc">粘贴 JSON 数据，一键格式化、压缩或校验。</div>
+            <div class="page-desc">把 JSON 粘进来，格式化、压缩、校验都行。</div>
             <div class="json-tool-area">
-                <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":1.0}</textarea>
+                <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":"1.0"}</textarea>
                 <div class="btn-group">
                     <button class="btn primary" id="btnFormat">✨ 格式化</button>
                     <button class="btn" id="btnCompress">📦 压缩</button>
@@ -244,16 +232,13 @@
                 <div id="jsonStatus" class="status-msg">等待操作…</div>
                 <div id="jsonResult" class="result-box" style="display:none;"></div>
             </div>
-            <div class="page-meta">💡 纯前端处理，数据不会上传服务器</div>
+            <div class="page-meta">全程在浏览器里跑，不上传任何数据</div>
         </div>
         <!-- 更多 -->
         <div class="page" id="page-more">
-            <div class="page-icon">🧩</div>
             <h2>更多工具</h2>
-            <div class="status-badge">📌 规划中</div>
-            <div class="page-desc">未来将陆续加入：<br />• 时间戳转换器<br />• 正则表达式测试器<br />• 二维码生成器<br />• 颜色转换工具</div>
-            <div class="page-meta">💡 如果你有想法，欢迎反馈</div>
-            <a href="#" class="btn-primary" style="background:#94a3b8; cursor:default;">敬请期待 <span class="arrow">🔜</span></a>
+            <div class="page-desc">暂时就这些，想到好用的会再往上加。</div>
+            <div class="page-meta">有想法也可以来提建议</div>
         </div>
     </main>
 
