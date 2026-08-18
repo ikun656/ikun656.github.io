@@ -368,7 +368,8 @@ Cloud 文件下载：文件列表通过 GitHub 官方 API 直连获取，不经�
             const viewPolicyBtn = document.getElementById('viewPolicyBtn');
             if (viewPolicyBtn) {
                 viewPolicyBtn.addEventListener('click', function() {
-                    if (window.openPolicy) window.openPolicy();
+                    const ov = document.getElementById('policyOverlay');
+                    if (ov) ov.classList.add('show');
                 });
             }
 
