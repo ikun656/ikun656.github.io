@@ -31,6 +31,11 @@
             setCookie('policy_agreed', 'true', 365);
             overlay.classList.remove('show');
         });
+
+        // 供主页“查看隐私政策”按钮调用：重新打开政策说明（不影响已同意状态）
+        window.openPolicy = function() {
+            overlay.classList.add('show');
+        };
     }
 
     if (document.readyState === 'loading') {
