@@ -14,7 +14,7 @@
     },
     {
       "page": "vsix",
-      "label": "VSIX 下载加速器",
+      "label": "VSIX 下载器",
       "icon": "download"
     },
     {
@@ -45,9 +45,9 @@
       "meta": "随手维护 · 纯前端"
     },
     "vsix": {
-      "title": "VSIX 下载加速器",
+      "title": "VSIX 下载器",
       "desc": "从 VS Code 插件市场把扩展的 VSIX 安装包拉下来，可以选版本、复制下载链接。",
-      "meta": "适合离线安装、内网环境"
+      "meta": "适合离线安装"
     },
     "cloud": {
       "title": "Cloud 文件下载",
