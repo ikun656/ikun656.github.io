@@ -19,7 +19,9 @@
         .sidebar .nav-list li { padding: 12px 16px; border-radius: 12px; margin-bottom: 4px; cursor: pointer; font-size: 15px; font-weight: 500; color: #334155; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
         .sidebar .nav-list li:hover { background: #f1f5f9; color: #0f172a; }
         .sidebar .nav-list li.active { background: #eef2ff; color: #2563eb; font-weight: 600; }
-        .sidebar .nav-list li .nav-icon { font-size: 20px; width: 28px; text-align: center; }
+        .sidebar .nav-list li .ico { width: 20px; height: 20px; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn-primary .ico, .btn .ico, .download-btn .ico, .download-link .ico { margin-right: 6px; }
         .sidebar .footer-nav { padding: 16px 20px 0; border-top: 1px solid #eef2f8; margin-top: 12px; font-size: 13px; color: #94a3b8; text-align: center; }
 
         /* ===== 右侧主内容 ===== */
@@ -143,7 +145,7 @@
             .sidebar .nav-list { display: flex; flex-wrap: wrap; padding: 8px 12px 0; gap: 4px; flex: 1 1 100%; }
             .sidebar .nav-list li { padding: 8px 14px; font-size: 14px; margin-bottom: 0; border-radius: 30px; background: #f8fafc; }
             .sidebar .nav-list li.active { background: #eef2ff; }
-            .sidebar .nav-list li .nav-icon { font-size: 16px; width: 22px; }
+            .sidebar .nav-list li .ico { width: 18px; height: 18px; }
             .sidebar .footer-nav { display: none; }
             .main { padding: 24px 20px; height: auto; overflow: auto; }
             .main .page h2 { font-size: 24px; }
@@ -160,7 +162,7 @@
     <!-- ===== 政策遮罩 ===== -->
     <div class="policy-overlay" id="policyOverlay">
         <div class="policy-card">
-            <h2>📋 请先同意政策</h2>
+            <h2><span class="ico" style="--ico:url(assets/icons/file-text.svg)"></span> 请先同意政策</h2>
             <div class="policy-text">
                 <strong>隐私政策</strong>
                 本工具站不会收集、存储或分享您的任何个人信息。所有功能均在浏览器本地运行，不涉及数据上传。您在使用过程中产生的任何数据仅保存在您的设备上。
@@ -179,12 +181,12 @@
             <div class="sub">工具站 · 轻量实用</div>
         </div>
         <ul class="nav-list" id="navList">
-            <li class="active" data-page="home"><span class="nav-icon">🏠</span> 站点介绍</li>
-            <li data-page="vsix"><span class="nav-icon">⬇️</span> VSIX 下载加速器</li>
-            <li data-page="cloud"><span class="nav-icon">📂</span> Cloud 文件下载</li>
-            <li data-page="software"><span class="nav-icon">📦</span> 软件下载站</li>
-            <li data-page="json"><span class="nav-icon">📋</span> JSON 格式化器</li>
-            <li data-page="more"><span class="nav-icon">🧩</span> 更多工具</li>
+            <li class="active" data-page="home"><span class="ico" style="--ico:url(assets/icons/house.svg)"></span> 站点介绍</li>
+            <li data-page="vsix"><span class="ico" style="--ico:url(assets/icons/download.svg)"></span> VSIX 下载加速器</li>
+            <li data-page="cloud"><span class="ico" style="--ico:url(assets/icons/folder.svg)"></span> Cloud 文件下载</li>
+            <li data-page="software"><span class="ico" style="--ico:url(assets/icons/package.svg)"></span> 软件下载站</li>
+            <li data-page="json"><span class="ico" style="--ico:url(assets/icons/braces.svg)"></span> JSON 格式化器</li>
+            <li data-page="more"><span class="ico" style="--ico:url(assets/icons/ellipsis.svg)"></span> 更多工具</li>
         </ul>
         <div class="footer-nav">© 2026 ikun656 · 保留所有权利</div>
     </aside>
@@ -224,10 +226,10 @@
             <div class="json-tool-area">
                 <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":"1.0"}</textarea>
                 <div class="btn-group">
-                    <button class="btn primary" id="btnFormat">✨ 格式化</button>
-                    <button class="btn" id="btnCompress">📦 压缩</button>
-                    <button class="btn success" id="btnValidate">✔️ 校验</button>
-                    <button class="btn danger" id="btnClear">🗑️ 清空</button>
+                    <button class="btn primary" id="btnFormat"><span class="ico" style="--ico:url(assets/icons/sparkles.svg)"></span> 格式化</button>
+                    <button class="btn" id="btnCompress"><span class="ico" style="--ico:url(assets/icons/minimize.svg)"></span> 压缩</button>
+                    <button class="btn success" id="btnValidate"><span class="ico" style="--ico:url(assets/icons/check.svg)"></span> 校验</button>
+                    <button class="btn danger" id="btnClear"><span class="ico" style="--ico:url(assets/icons/trash-2.svg)"></span> 清空</button>
                 </div>
                 <div id="jsonStatus" class="status-msg">等待操作…</div>
                 <div id="jsonResult" class="result-box" style="display:none;"></div>
@@ -308,26 +310,26 @@
                 const raw = inputEl.value.trim();
                 if (!raw) { setStatus('请输入 JSON 数据', 'error'); return null; }
                 try { return JSON.parse(raw); }
-                catch (e) { setStatus('❌ JSON 解析错误: ' + e.message, 'error'); showResult(e.message, true); return null; }
+                catch (e) { setStatus('JSON 解析错误: ' + e.message, 'error'); showResult(e.message, true); return null; }
             }
 
             btnFormat.addEventListener('click', function() {
                 const data = getJsonData();
                 if (data === null) return;
-                try { const formatted = JSON.stringify(data, null, 4); showResult(formatted, false); setStatus('✅ 格式化成功', 'success'); }
-                catch (e) { setStatus('❌ 格式化失败: ' + e.message, 'error'); showResult(e.message, true); }
+                try { const formatted = JSON.stringify(data, null, 4); showResult(formatted, false); setStatus('格式化成功', 'success'); }
+                catch (e) { setStatus('格式化失败: ' + e.message, 'error'); showResult(e.message, true); }
             });
             btnCompress.addEventListener('click', function() {
                 const data = getJsonData();
                 if (data === null) return;
-                try { const compressed = JSON.stringify(data); showResult(compressed, false); setStatus('✅ 压缩成功', 'success'); }
-                catch (e) { setStatus('❌ 压缩失败: ' + e.message, 'error'); showResult(e.message, true); }
+                try { const compressed = JSON.stringify(data); showResult(compressed, false); setStatus('压缩成功', 'success'); }
+                catch (e) { setStatus('压缩失败: ' + e.message, 'error'); showResult(e.message, true); }
             });
             btnValidate.addEventListener('click', function() {
                 const raw = inputEl.value.trim();
                 if (!raw) { setStatus('请输入 JSON 数据', 'error'); hideResult(); return; }
-                try { JSON.parse(raw); setStatus('✅ 校验通过', 'success'); showResult('✓ JSON 语法正确', false); }
-                catch (e) { setStatus('❌ 校验失败: ' + e.message, 'error'); showResult(e.message, true); }
+                try { JSON.parse(raw); setStatus('校验通过', 'success'); showResult('JSON 语法正确', false); }
+                catch (e) { setStatus('校验失败: ' + e.message, 'error'); showResult(e.message, true); }
             });
             btnClear.addEventListener('click', function() { inputEl.value = ''; hideResult(); setStatus('已清空', ''); });
 

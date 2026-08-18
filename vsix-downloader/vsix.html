@@ -21,6 +21,8 @@
         .btn-outline { background: transparent; color: #2563eb; border: 2px solid #2563eb; }
         .btn-outline:hover { background: #e6f2fc; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico, .btn-primary .ico, .btn-success .ico, .btn-outline .ico { margin-right: 6px; }
         .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; font-size: 13px; color: #64748b; }
         .examples span { cursor: pointer; color: #2563eb; background: #e6f2fc; padding: 2px 12px; border-radius: 20px; font-weight: 500; transition: 0.2s; }
         .examples span:hover { background: #c7e0f7; color: #005a9e; }
@@ -64,7 +66,7 @@
 
         <div class="input-group">
             <input type="text" id="inputExtension" placeholder="例如：ms-dotnettools.csharp 或 完整URL" autofocus spellcheck="false" />
-            <button class="btn btn-primary" id="btnFetch">🔍 获取版本</button>
+            <button class="btn btn-primary" id="btnFetch"><span class="ico" style="--ico:url(../assets/icons/search.svg)"></span> 获取版本</button>
         </div>
         <div class="examples">
             <span>试试：</span>
@@ -83,7 +85,7 @@
         </div>
 
         <div class="version-section">
-            <label for="versionSelect">📦 版本</label>
+            <label for="versionSelect"><span class="ico" style="--ico:url(../assets/icons/package.svg)"></span> 版本</label>
             <select id="versionSelect" disabled><option value="">— 请先获取版本 —</option></select>
             <div class="manual-input">
                 <input type="text" id="manualVersion" placeholder="或手动输入版本" spellcheck="false" />
@@ -92,9 +94,9 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-success" id="btnDownload" disabled><span class="icon">⬇</span> 下载 VSIX</button>
-            <button class="btn btn-outline" id="btnCopyLink" disabled><span class="icon">📋</span> 复制链接</button>
-            <button class="btn" id="btnOpenMarket" disabled><span class="icon">🌐</span> 市场页</button>
+            <button class="btn btn-success" id="btnDownload" disabled><span class="ico" style="--ico:url(../assets/icons/download.svg)"></span> 下载 VSIX</button>
+            <button class="btn btn-outline" id="btnCopyLink" disabled><span class="ico" style="--ico:url(../assets/icons/copy.svg)"></span> 复制链接</button>
+            <button class="btn" id="btnOpenMarket" disabled><span class="ico" style="--ico:url(../assets/icons/globe.svg)"></span> 市场页</button>
         </div>
 
         <div class="footer">数据来自 Visual Studio Marketplace</div>
@@ -136,11 +138,11 @@
                 if (type === 'loading') {
                     statusIcon.innerHTML = '<span class="spinner"></span>';
                 } else if (type === 'success') {
-                    statusIcon.textContent = '✅';
+                    statusIcon.textContent = '';
                 } else if (type === 'error') {
-                    statusIcon.textContent = '❌';
+                    statusIcon.textContent = '';
                 } else if (type === 'info') {
-                    statusIcon.textContent = 'ℹ️';
+                    statusIcon.textContent = '';
                 } else {
                     statusIcon.textContent = '';
                 }
@@ -336,7 +338,7 @@
                 setStatus('loading', `正在获取 ${publisher}.${extension} 的版本列表...`);
                 isFetching = true;
                 btnFetch.disabled = true;
-                btnFetch.textContent = '⏳ 获取中...';
+                btnFetch.textContent = '获取中...';
 
                 try {
                     const data = await fetchVersions(publisher, extension);
@@ -347,14 +349,14 @@
                         versionSelect.disabled = true;
                         enableActions();
                         btnFetch.disabled = false;
-                        btnFetch.textContent = '🔍 获取版本';
+                        btnFetch.textContent = '获取版本';
                         isFetching = false;
                         return;
                     }
                     const latest = versions[0];
                     populateVersionSelect(versions, latest);
-                    setStatus('success', `✅ 获取成功！共 ${versions.length} 个版本，最新版本：${latest}`);
-                    btnFetch.textContent = '🔄 刷新';
+                    setStatus('success', `获取成功！共 ${versions.length} 个版本，最新版本：${latest}`);
+                    btnFetch.textContent = '刷新';
                     enableActions();
                 } catch (err) {
                     console.warn('Fetch error:', err);
@@ -371,8 +373,8 @@
                 } finally {
                     isFetching = false;
                     btnFetch.disabled = false;
-                    if (btnFetch.textContent === '⏳ 获取中...') {
-                        btnFetch.textContent = '🔍 获取版本';
+                    if (btnFetch.textContent === '获取中...') {
+                        btnFetch.textContent = '获取版本';
                     }
                 }
             }
@@ -401,7 +403,7 @@
                                 if (text) errorMsg = text.slice(0, 200);
                             } catch (_) {}
                         }
-                        setStatus('error', `❌ ${errorMsg}`);
+                        setStatus('error', `${errorMsg}`);
                         btnDownload.disabled = false;
                         return;
                     }
@@ -413,7 +415,7 @@
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
-                    setStatus('success', `✅ 下载完成：${filename}`);
+                    setStatus('success', `下载完成：${filename}`);
                     btnDownload.disabled = false;
                 } catch (err) {
                     console.warn('Fetch failed, fallback to direct link:', err);
@@ -503,7 +505,7 @@
                 const url = buildDownloadUrl(currentPublisher, currentExtension, currentVersion);
                 try {
                     await navigator.clipboard.writeText(url);
-                    setStatus('success', '✅ 下载链接已复制到剪贴板');
+                    setStatus('success', '下载链接已复制到剪贴板');
                     btnCopyLink.classList.remove('flash-success');
                     void btnCopyLink.offsetWidth;
                     btnCopyLink.classList.add('flash-success');
@@ -514,7 +516,7 @@
                     textarea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textarea);
-                    setStatus('success', '✅ 下载链接已复制到剪贴板');
+                    setStatus('success', '下载链接已复制到剪贴板');
                 }
             });
 

@@ -18,6 +18,8 @@
         .btn { background: #2563eb; color: #fff; border: none; padding: 8px 24px; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; font-size: 15px; }
         .btn:hover { background: #1d4ed8; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico, .download-link .ico { margin-right: 6px; }
         .status { margin: 10px 0 18px; padding: 10px 16px; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 14px; display: none; }
         .status.show { display: block; }
         .status.error { background: #fde8e8; color: #721c24; }
@@ -121,7 +123,7 @@
     <!-- ===== 政策遮罩（与之前一致） ===== -->
     <div class="policy-overlay" id="policyOverlay">
         <div class="policy-card">
-            <h2>📋 请先同意政策</h2>
+            <h2><span class="ico" style="--ico:url(../assets/icons/file-text.svg)"></span> 请先同意政策</h2>
             <div class="policy-text">
                 <strong>隐私政策</strong>
                 本工具站不会收集、存储或分享您的任何个人信息。所有功能均在浏览器本地运行，不涉及数据上传。您在使用过程中产生的任何数据仅保存在您的设备上。
@@ -148,7 +150,7 @@
                 <option value="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz/</option>
                 <option value="https://gh.ddlc.top/">https://gh.ddlc.top/</option>
             </select>
-            <button class="btn" id="refreshBtn">🔄 刷新列表</button>
+            <button class="btn" id="refreshBtn"><span class="ico" style="--ico:url(../assets/icons/refresh-cw.svg)"></span> 刷新列表</button>
         </div>
 
         <div class="status" id="status"></div>
@@ -211,13 +213,13 @@
                                 ${noteHtml}
                             </div>
                             <div class="actions">
-                                <a href="${displayUrl}" class="download-link" download target="_blank">⬇ 下载</a>
+                                <a href="${displayUrl}" class="download-link" download target="_blank"><span class="ico" style="--ico:url(../assets/icons/download.svg)"></span> 下载</a>
                             </div>
                         </div>
                     `;
                 }
                 listContainer.innerHTML = html;
-                setStatus(`✅ 已加载 ${softwareList.length} 个软件`, 'success');
+                setStatus(`已加载 ${softwareList.length} 个软件`, 'success');
             }
 
             refreshBtn.addEventListener('click', renderList);

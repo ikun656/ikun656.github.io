@@ -18,6 +18,8 @@
         .btn { background: #2563eb; color: #fff; border: none; padding: 8px 24px; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; font-size: 15px; }
         .btn:hover { background: #1d4ed8; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico, .download-btn .ico, .direct-link .ico { margin-right: 6px; }
         .status { margin: 10px 0 18px; padding: 10px 16px; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 14px; display: none; }
         .status.show { display: block; }
         .status.error { background: #fde8e8; color: #721c24; }
@@ -122,7 +124,7 @@
     <!-- ===== 政策遮罩（与之前一致） ===== -->
     <div class="policy-overlay" id="policyOverlay">
         <div class="policy-card">
-            <h2>📋 请先同意政策</h2>
+            <h2><span class="ico" style="--ico:url(../assets/icons/file-text.svg)"></span> 请先同意政策</h2>
             <div class="policy-text">
                 <strong>隐私政策</strong>
                 本工具站不会收集、存储或分享您的任何个人信息。所有功能均在浏览器本地运行，不涉及数据上传。您在使用过程中产生的任何数据仅保存在您的设备上。
@@ -149,7 +151,7 @@
                 <option value="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz/</option>
                 <option value="https://gh.ddlc.top/">https://gh.ddlc.top/</option>
             </select>
-            <button class="btn" id="refreshBtn">🔄 刷新列表</button>
+            <button class="btn" id="refreshBtn"><span class="ico" style="--ico:url(../assets/icons/refresh-cw.svg)"></span> 刷新列表</button>
         </div>
 
         <div class="status" id="status"></div>
@@ -193,7 +195,7 @@
 
             async function fetchFileList() {
                 const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DIR_PATH}`;
-                setStatus('⏳ 正在获取文件列表...', '');
+                setStatus('正在获取文件列表...', '');
                 refreshBtn.disabled = true;
                 try {
                     const response = await fetch(apiUrl);
@@ -209,14 +211,14 @@
                     if (!Array.isArray(data)) throw new Error('返回数据格式异常');
                     const files = data.filter(item => item.type === 'file');
                     if (files.length === 0) {
-                        setStatus('⚠️ cloud 目录为空', 'error');
+                        setStatus('cloud 目录为空', 'error');
                         fileListEl.innerHTML = `<div class="empty">暂无文件</div>`;
                         return;
                     }
                     renderFileList(files);
-                    setStatus(`✅ 成功加载 ${files.length} 个文件`, 'success');
+                    setStatus(`成功加载 ${files.length} 个文件`, 'success');
                 } catch (err) {
-                    setStatus(`❌ 加载失败：${err.message}`, 'error');
+                    setStatus(`加载失败：${err.message}`, 'error');
                     fileListEl.innerHTML = `<div class="empty">加载失败，请检查网络</div>`;
                 } finally {
                     refreshBtn.disabled = false;
@@ -258,8 +260,8 @@
                                 <span class="size">${getFileSize(file)}</span>
                             </div>
                             <div class="actions">
-                                <button class="download-btn" data-url="${rawUrl}" data-filename="${file.name}">⬇ 下载文件</button>
-                                <a href="${rawUrl}" class="direct-link" target="_blank" title="直接打开（可右键另存为）">🔗 直连</a>
+                                <button class="download-btn" data-url="${rawUrl}" data-filename="${file.name}"><span class="ico" style="--ico:url(../assets/icons/download.svg)"></span> 下载文件</button>
+                                <a href="${rawUrl}" class="direct-link" target="_blank" title="直接打开（可右键另存为）"><span class="ico" style="--ico:url(../assets/icons/link.svg)"></span> 直连</a>
                             </div>
                         </div>
                     `;
@@ -271,7 +273,7 @@
                         const filename = this.dataset.filename;
                         const originalText = this.textContent;
                         this.disabled = true;
-                        this.textContent = '⏳ 下载中...';
+                        this.textContent = '下载中...';
                         downloadFile(url, filename);
                         setTimeout(() => {
                             this.disabled = false;
