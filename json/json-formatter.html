@@ -4,45 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON 格式化器</title>
+    <script>
+        (function() {
+            var m = document.cookie.match(/(^| )theme_pref=([^;]+)/);
+            if (m && m[2] === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    <link rel="stylesheet" href="/theme.css" />
     <style>
         /* ===== 基础样式 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 40px 20px; color: #1e293b; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 30px 35px; }
-        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
-        .sub { color: #64748b; font-size: 15px; margin-bottom: 25px; border-left: 4px solid #2563eb; padding-left: 14px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 40px 20px; color: var(--text); transition: background .2s, color .2s; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 30px 35px; transition: background .2s; }
+        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; color: var(--text-strong); }
+        .sub { color: var(--text-muted); font-size: 15px; margin-bottom: 25px; border-left: 4px solid var(--accent-bar); padding-left: 14px; }
         .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
         .btn .ico { margin-right: 6px; }
 
         /* ===== 文本域 ===== */
-        .json-tool-area textarea { width: 100%; height: 200px; padding: 12px; border: 2px solid #d1d9e6; border-radius: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; resize: vertical; transition: border 0.2s; background: #ffffff; }
-        .json-tool-area textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .json-tool-area textarea { width: 100%; height: 200px; padding: 12px; border: 2px solid var(--border-strong); border-radius: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; resize: vertical; transition: border 0.2s; background: var(--surface); color: var(--text); }
+        .json-tool-area textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         .json-indent-row { margin: 12px 0; display: flex; align-items: center; gap: 8px; }
-        .json-indent-row label { font-size: 13px; color: #64748a; }
-        .json-indent-row select { padding: 4px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; background: #fff; }
+        .json-indent-row label { font-size: 13px; color: var(--text-muted); }
+        .json-indent-row select { padding: 4px 10px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 13px; background: var(--surface); color: var(--text); }
 
         /* ===== 按钮组 ===== */
         .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
-        .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; background: #eef2f8; color: #1e293b; font-size: 14px; }
-        .btn:hover { background: #d5dce4; }
-        .btn.primary { background: #2563eb; color: #fff; }
-        .btn.primary:hover { background: #1d4ed8; }
-        .btn.success { background: #28a745; color: #fff; }
-        .btn.success:hover { background: #1e7e34; }
-        .btn.danger { background: #dc3545; color: #fff; }
-        .btn.danger:hover { background: #c82333; }
+        .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; background: var(--btn-bg); color: var(--text); font-size: 14px; }
+        .btn:hover { background: var(--btn-bg-hover); }
+        .btn.primary { background: var(--primary); color: #fff; }
+        .btn.primary:hover { background: var(--primary-hover); }
+        .btn.success { background: var(--success); color: #fff; }
+        .btn.success:hover { background: var(--success-hover); }
+        .btn.danger { background: var(--danger); color: #fff; }
+        .btn.danger:hover { background: var(--danger-hover); }
 
         /* ===== 结果区 ===== */
-        .result-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 8px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; color: #0f172a; }
-        .result-box.error { color: #dc3545; background: #fde8e8; border-color: #f5c6cb; }
-        .status-msg { font-size: 14px; color: #475569; margin: 6px 0 4px; }
-        .status-msg.error { color: #dc3545; }
-        .status-msg.success { color: #28a745; }
+        .result-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 8px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; color: var(--text-strong); }
+        .result-box.error { color: var(--danger); background: rgba(220,53,69,0.08); border-color: var(--danger); }
+        .status-msg { font-size: 14px; color: var(--text-muted); margin: 6px 0 4px; }
+        .status-msg.error { color: var(--danger); }
+        .status-msg.success { color: var(--success); }
         #resultWrapper { margin-top: 12px; }
 
-        .footer { margin-top: 30px; font-size: 13px; color: #94a3b8; text-align: center; border-top: 1px solid #eef2f8; padding-top: 20px; }
-        .tip { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: #475569; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #2563eb; text-decoration: none; font-size: 14px; }
+        .footer { margin-top: 30px; font-size: 13px; color: var(--text-soft); text-align: center; border-top: 1px solid var(--border); padding-top: 20px; }
+        .tip { background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: var(--text-muted); }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-size: 14px; }
         .back-link:hover { text-decoration: underline; }
 
         /* ===== 政策弹窗样式 ===== */
@@ -64,7 +71,7 @@
             pointer-events: auto;
         }
         .policy-card {
-            background: #fff;
+            background: var(--surface);
             max-width: 680px;
             width: 90%;
             max-height: 85vh;
@@ -81,7 +88,7 @@
         .policy-card h2 {
             font-size: 24px;
             margin-bottom: 16px;
-            color: #0f172a;
+            color: var(--text-strong);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -89,22 +96,22 @@
         .policy-card .policy-text {
             font-size: 15px;
             line-height: 1.7;
-            color: #334155;
+            color: var(--text-muted);
             margin-bottom: 20px;
             white-space: pre-wrap;
             word-break: break-word;
-            border: 1px solid #eef2f8;
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 16px;
-            background: #f8fafc;
+            background: var(--surface-2);
             max-height: 300px;
             overflow-y: auto;
         }
         .policy-card .policy-text strong {
-            color: #2563eb;
+            color: var(--primary);
         }
         .policy-card .btn-agree {
-            background: #2563eb;
+            background: var(--primary);
             color: #fff;
             border: none;
             padding: 14px 40px;
@@ -116,11 +123,13 @@
             width: 100%;
         }
         .policy-card .btn-agree:hover {
-            background: #1d4ed8;
+            background: var(--primary-hover);
         }
         @media (max-width: 480px) {
+            .container { padding: 22px 18px; }
             .policy-card { padding: 24px 20px; }
             .policy-card h2 { font-size: 20px; }
+            .btn-group .btn { flex: 1; min-width: 80px; text-align: center; }
         }
     </style>
 </head>
@@ -199,8 +208,9 @@ Cloud 文件下载：文件列表通过 GitHub 官方 API 直连获取，不经�
         <div class="footer">全程在浏览器里跑，不上传任何数据</div>
     </div>
 
-    <!-- ===== 引入独立的 policy.js ===== -->
+    <!-- ===== 引入独立的 policy.js / theme.js ===== -->
     <script src="/policy.js"></script>
+    <script src="/theme.js"></script>
 
     <!-- ===== JSON 工具逻辑 ===== -->
     <script>

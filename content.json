@@ -33,6 +33,16 @@
       "icon": "braces"
     },
     {
+      "page": "base64",
+      "label": "Base64 编解码",
+      "icon": "refresh-cw"
+    },
+    {
+      "page": "timestamp",
+      "label": "时间戳转换",
+      "icon": "search"
+    },
+    {
       "page": "more",
       "label": "更多工具",
       "icon": "ellipsis"
@@ -62,6 +72,16 @@
     "json": {
       "title": "JSON 格式化器",
       "desc": "把 JSON 粘进来，格式化、压缩、校验、转义都行，还支持自定义缩进。",
+      "meta": "全程在浏览器里跑，不上传任何数据"
+    },
+    "base64": {
+      "title": "Base64 编解码",
+      "desc": "文本和 Base64 互转，支持 URL-safe 模式，用来处理编码或做简单混淆都行。",
+      "meta": "全程在浏览器里跑，不上传任何数据"
+    },
+    "timestamp": {
+      "title": "时间戳转换",
+      "desc": "Unix 时间戳和日期互转，自动判断秒或毫秒，本地时间和 UTC 都给你。",
       "meta": "全程在浏览器里跑，不上传任何数据"
     },
     "more": {

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间戳转换</title>
+    <link rel="stylesheet" href="/theme.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 40px 20px; color: var(--text); transition: background .2s, color .2s; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 30px 35px; transition: background .2s; }
+        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; color: var(--text-strong); }
+        .sub { color: var(--text-muted); font-size: 15px; margin-bottom: 25px; border-left: 4px solid var(--accent-bar); padding-left: 14px; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico { margin-right: 6px; }
+
+        .panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+        .panel h3 { font-size: 16px; color: var(--text-strong); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+        .field { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .field label { font-size: 14px; color: var(--text-muted); min-width: 84px; }
+        .field input[type="text"], .field input[type="number"] {
+            flex: 1; min-width: 200px; padding: 10px 12px; border: 2px solid var(--border-strong);
+            border-radius: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px;
+            background: var(--surface); color: var(--text); transition: border .2s;
+        }
+        .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .field select { padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 14px; }
+
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background .2s; background: var(--btn-bg); color: var(--text); font-size: 14px; }
+        .btn:hover { background: var(--btn-bg-hover); }
+        .btn.primary { background: var(--primary); color: #fff; }
+        .btn.primary:hover { background: var(--primary-hover); }
+
+        .result-line { margin-top: 12px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 15px; color: var(--text-strong); word-break: break-all; }
+        .result-line span.k { color: var(--text-muted); }
+        .status-msg { font-size: 14px; color: var(--text-muted); margin: 6px 0 4px; }
+        .status-msg.error { color: var(--danger); }
+        .status-msg.success { color: var(--success); }
+
+        .footer { margin-top: 30px; font-size: 13px; color: var(--text-soft); text-align: center; border-top: 1px solid var(--border); padding-top: 20px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-size: 14px; }
+        .back-link:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .container { padding: 22px 18px; }
+            .field label { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 政策遮罩由 /policy.js 自动注入 ===== -->
+
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回主页</a>
+        <h1><span class="ico" style="--ico:url(../assets/icons/search.svg)"></span> 时间戳转换</h1>
+        <div class="sub">Unix 时间戳 ↔ 日期互转，支持秒/毫秒，显示本地与 UTC</div>
+
+        <div class="panel">
+            <h3><span class="ico" style="--ico:url(../assets/icons/search.svg)"></span> 时间戳 → 日期</h3>
+            <div class="field">
+                <label for="tsInput">时间戳</label>
+                <input type="text" id="tsInput" placeholder="例如 1700000000 或 1700000000000" />
+                <select id="tsUnit">
+                    <option value="auto">自动判断</option>
+                    <option value="s">秒</option>
+                    <option value="ms">毫秒</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn primary" id="btnToDate">转日期</button>
+                <button class="btn" id="btnNow">填入当前时间戳</button>
+            </div>
+            <div id="tsStatus" class="status-msg">等待操作…</div>
+            <div id="tsResult" class="result-line" style="display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <h3><span class="ico" style="--ico:url(../assets/icons/refresh-cw.svg)"></span> 日期 → 时间戳</h3>
+            <div class="field">
+                <label for="dtInput">日期时间</label>
+                <input type="text" id="dtInput" placeholder="例如 2023-11-15 08:00:00" />
+            </div>
+            <div class="btn-group">
+                <button class="btn primary" id="btnToTs">转时间戳</button>
+                <button class="btn" id="btnNowDate">填入当前时间</button>
+            </div>
+            <div id="dtStatus" class="status-msg">等待操作…</div>
+            <div id="dtResult" class="result-line" style="display:none;"></div>
+        </div>
+
+        <div class="footer">全程在浏览器里跑，不上传任何数据</div>
+    </div>
+
+    <script src="/policy.js"></script>
+    <script src="/theme.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            var tsInput = document.getElementById('tsInput');
+            var tsUnit = document.getElementById('tsUnit');
+            var tsStatus = document.getElementById('tsStatus');
+            var tsResult = document.getElementById('tsResult');
+            var dtInput = document.getElementById('dtInput');
+            var dtStatus = document.getElementById('dtStatus');
+            var dtResult = document.getElementById('dtResult');
+
+            function pad(n) { return n < 10 ? '0' + n : '' + n; }
+            function fmt(d) {
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+                       pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+            }
+
+            function tsToMs(val, unit) {
+                var n = Number(val);
+                if (!isFinite(n)) return null;
+                if (unit === 's') return Math.round(n * 1000);
+                if (unit === 'ms') return Math.round(n);
+                // 自动判断
+                if (val.length > 11 || n >= 1e12) return Math.round(n);
+                return Math.round(n * 1000);
+            }
+
+            document.getElementById('btnToDate').addEventListener('click', function() {
+                var ms = tsToMs(tsInput.value.trim(), tsUnit.value);
+                if (ms === null) { tsStatus.textContent = '请输入有效的时间戳'; tsStatus.className = 'status-msg error'; tsResult.style.display = 'none'; return; }
+                var d = new Date(ms);
+                if (isNaN(d.getTime())) { tsStatus.textContent = '时间戳无效'; tsStatus.className = 'status-msg error'; tsResult.style.display = 'none'; return; }
+                tsResult.innerHTML = '<span class="k">本地：</span>' + fmt(d) + '<br><span class="k">UTC：</span>' + d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+                tsResult.style.display = 'block';
+                tsStatus.textContent = '转换成功（秒：' + Math.floor(ms / 1000) + '，毫秒：' + ms + '）';
+                tsStatus.className = 'status-msg success';
+            });
+
+            document.getElementById('btnNow').addEventListener('click', function() {
+                var now = Date.now();
+                tsInput.value = now;
+                tsUnit.value = 'ms';
+            });
+
+            document.getElementById('btnToTs').addEventListener('click', function() {
+                var raw = dtInput.value.trim();
+                if (!raw) { dtStatus.textContent = '请输入日期时间'; dtStatus.className = 'status-msg error'; dtResult.style.display = 'none'; return; }
+                // 兼容 2023-11-15 08:00:00 / 2023/11/15 08:00:00
+                var s = raw.replace(/-/g, '/');
+                var d = new Date(s);
+                if (isNaN(d.getTime())) { dtStatus.textContent = '日期格式无效，请用 年-月-日 时:分:秒'; dtStatus.className = 'status-msg error'; dtResult.style.display = 'none'; return; }
+                var ms = d.getTime();
+                dtResult.innerHTML = '<span class="k">秒：</span>' + Math.floor(ms / 1000) + '<br><span class="k">毫秒：</span>' + ms;
+                dtResult.style.display = 'block';
+                dtStatus.textContent = '转换成功';
+                dtStatus.className = 'status-msg success';
+            });
+
+            document.getElementById('btnNowDate').addEventListener('click', function() {
+                dtInput.value = fmt(new Date());
+            });
+
+            window.addEventListener('load', function() {
+                tsStatus.textContent = '输入时间戳，点击转日期';
+                dtStatus.textContent = '输入日期时间，点击转时间戳';
+            });
+            console.log('时间戳转换已启动');
+        })();
+    </script>
+</body>
+</html>
