@@ -46,6 +46,13 @@
         '.policy-card .policy-text strong{color:#2563eb}' +
         '.policy-card .btn-agree{background:#2563eb;color:#fff;border:none;padding:14px 40px;border-radius:40px;font-size:18px;font-weight:600;cursor:pointer;transition:background .2s;width:100%}' +
         '.policy-card .btn-agree:hover{background:#1d4ed8}' +
+        '@media(max-width:480px){.policy-card{padding:24px 20px}.policy-card h2{font-size:20px}}' +
+        '[data-theme="dark"] .policy-card{background:#1b242e;border-color:#283442}' +
+        '[data-theme="dark"] .policy-card h2{color:#f1f5f9}' +
+        '[data-theme="dark"] .policy-card .policy-text{color:#94a3b8;border-color:#283442;background:#222c38}' +
+        '[data-theme="dark"] .policy-card .policy-text strong{color:#3b82f6}' +
+        '[data-theme="dark"] .policy-card .btn-agree{background:#3b82f6}' +
+        '[data-theme="dark"] .policy-card .btn-agree:hover{background:#60a5fa}' +
         '@media(max-width:480px){.policy-card{padding:24px 20px}.policy-card h2{font-size:20px}}';
 
     function setCookie(name, value, days) {
