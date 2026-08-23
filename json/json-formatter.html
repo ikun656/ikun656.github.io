@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 格式化器</title>
+    <style>
+        /* ===== 基础样式 ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 40px 20px; color: #1e293b; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 30px 35px; }
+        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .sub { color: #64748b; font-size: 15px; margin-bottom: 25px; border-left: 4px solid #2563eb; padding-left: 14px; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico { margin-right: 6px; }
+
+        /* ===== 文本域 ===== */
+        .json-tool-area textarea { width: 100%; height: 200px; padding: 12px; border: 2px solid #d1d9e6; border-radius: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; resize: vertical; transition: border 0.2s; background: #ffffff; }
+        .json-tool-area textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .json-indent-row { margin: 12px 0; display: flex; align-items: center; gap: 8px; }
+        .json-indent-row label { font-size: 13px; color: #64748a; }
+        .json-indent-row select { padding: 4px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; background: #fff; }
+
+        /* ===== 按钮组 ===== */
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+        .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background 0.2s; background: #eef2f8; color: #1e293b; font-size: 14px; }
+        .btn:hover { background: #d5dce4; }
+        .btn.primary { background: #2563eb; color: #fff; }
+        .btn.primary:hover { background: #1d4ed8; }
+        .btn.success { background: #28a745; color: #fff; }
+        .btn.success:hover { background: #1e7e34; }
+        .btn.danger { background: #dc3545; color: #fff; }
+        .btn.danger:hover { background: #c82333; }
+
+        /* ===== 结果区 ===== */
+        .result-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 8px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; color: #0f172a; }
+        .result-box.error { color: #dc3545; background: #fde8e8; border-color: #f5c6cb; }
+        .status-msg { font-size: 14px; color: #475569; margin: 6px 0 4px; }
+        .status-msg.error { color: #dc3545; }
+        .status-msg.success { color: #28a745; }
+        #resultWrapper { margin-top: 12px; }
+
+        .footer { margin-top: 30px; font-size: 13px; color: #94a3b8; text-align: center; border-top: 1px solid #eef2f8; padding-top: 20px; }
+        .tip { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: #475569; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #2563eb; text-decoration: none; font-size: 14px; }
+        .back-link:hover { text-decoration: underline; }
+
+        /* ===== 政策弹窗样式 ===== */
+        .policy-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .policy-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .policy-card {
+            background: #fff;
+            max-width: 680px;
+            width: 90%;
+            max-height: 85vh;
+            border-radius: 24px;
+            padding: 32px 36px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .policy-overlay.show .policy-card {
+            transform: scale(1);
+        }
+        .policy-card h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .policy-card .policy-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #334155;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid #eef2f8;
+            border-radius: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .policy-card .policy-text strong {
+            color: #2563eb;
+        }
+        .policy-card .btn-agree {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .policy-card .btn-agree:hover {
+            background: #1d4ed8;
+        }
+        @media (max-width: 480px) {
+            .policy-card { padding: 24px 20px; }
+            .policy-card h2 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 政策遮罩（与之前一致） ===== -->
+    <div class="policy-overlay" id="policyOverlay">
+        <div class="policy-card">
+            <h2><span class="ico" style="--ico:url(../assets/icons/file-text.svg)"></span> 请先同意政策</h2>
+            <div class="policy-text">
+<strong>一、声明与适用范围</strong>
+欢迎使用 ikun656 工具站。本页说明本站如何处理你的信息，以及使用各工具时数据会去到哪里。本站是一个纯前端、个人维护的轻量工具集合，部署在 GitHub Pages 上，没有后端服务器，也不存在账号体系。只要你继续使用本站的任意页面，即表示你已阅读并理解本说明。
+
+<strong>二、我们到底收集了什么</strong>
+简单说：我们什么都没收集。本站运行在你自己的浏览器里，所有工具的计算、解析、格式化都在本地完成。我们不会在服务器端记录你的访问行为，不会保存你粘贴的文本内容，不会写入任何与你个人相关的数据库，也不会把你的操作上报给任何第三方。你产生的一切数据，从输入到结果，都只停留在你当前打开的这个浏览器标签页里，关掉页面即消失。
+
+<strong>三、各个工具的数据流向</strong>
+JSON 格式化器：完全离线。你粘贴的 JSON 在浏览器内解析、压缩、校验，不经过任何网络请求。
+VSIX 下载加速器：当你输入扩展标识并点击获取版本时，浏览器会向 Visual Studio Marketplace 的公开接口请求版本列表。由于浏览器跨域限制，这一步通常借助第三方 CORS 代理（如 corsproxy.io、api.allorigins.win 等）中转；这些代理只是转发请求，本站不会把你的标识用于其他用途。下载 VSIX 安装包时，浏览器直接向你指定的 Marketplace 地址发起请求。以上过程不会向我们回传任何内容。
+Cloud 文件下载：文件列表通过 GitHub 官方 API 直连获取，不经过代理；下载文件时你可以自行选择是否通过 GitHub 代理加速。列表与文件均来自本仓库公开目录，不涉及你的个人信息。
+软件下载站：页面上的下载链接指向 F-Droid、Termux、NewPipe 等第三方提供的安装包；对 GitHub 资源会按你的选择自动附加代理前缀，对清华源等镜像直连。点击下载即跳转或拉取对应第三方资源，本站仅做汇总，不托管这些安装包。
+
+<strong>四、Cookie 与本地存储</strong>
+为了记住你是否已经看过本说明，本站只在你的浏览器里写入一个名为 policy_agreed 的 Cookie，有效期 365 天。它只记录“已同意”这一个状态，不包含任何可识别你身份的信息。除此之外，本站不使用 LocalStorage、SessionStorage 或其他追踪技术。你可以在浏览器设置中随时清除该 Cookie，清除后再次访问会重新弹出本说明。
+
+<strong>五、第三方服务与免责</strong>
+使用本站时，部分功能会依赖 GitHub、Visual Studio Marketplace，以及若干公开 CORS 代理和镜像站点。这些服务由各自运营方提供，其可用性、安全性与隐私实践不在本站控制范围内。若因第三方服务中断、变更或数据问题导致你无法使用某个工具，本站不承担责任。请通过官方渠道获取重要软件，并注意核对来源与完整性。
+
+<strong>六、开源与版权</strong>
+本站的代码（HTML / CSS / JavaScript）以公开方式托管在 GitHub 上，供学习参考。你可以根据个人需求对代码进行修改和二次开发，但不得用于商业用途或恶意传播。页面中的品牌标识与原创内容版权归原作者所有；各工具所涉及的第三方软件，其版权归相应上游项目所有，请遵守各自的许可协议。
+
+<strong>七、总体免责声明</strong>
+本站所有工具均“按现状”提供，不对其可用性、准确性或适用性作出任何明示或默示担保。使用本站所产生的任何风险由你自己承担，包括但不限于数据丢失、下载内容的安全性，以及因依赖本工具而导致的任何后果。对于通过本站跳转或下载的第三方软件，其安全性与合规性由提供方负责，请自行判断并核实。
+
+<strong>八、政策变更</strong>
+我们可能不时更新本说明。更新后，本页内容即为最新版本，并在你下一次访问时生效；如果你此前已同意，不会因此重复打扰，但你随时可以在主页“查看隐私政策”中重新阅读。
+
+<strong>九、联系我们</strong>
+如对本说明或本站有任何疑问，可通过邮箱 djh2551706251@outlook.com 与我们联系。
+            </div>
+            <button class="btn-agree" id="agreeBtn">同意并继续</button>
+        </div>
+    </div>
+
+    <!-- ===== 页面主体 ===== -->
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回主页</a>
+        <h1>JSON 格式化器</h1>
+        <div class="sub">格式化、压缩、校验、转义，全程在浏览器里跑，不上传任何数据</div>
+        <div class="tip"><strong>提示：</strong> 你粘贴的内容只在本地浏览器处理，关掉页面即消失。</div>
+
+        <div class="json-tool-area">
+            <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":"1.0"}</textarea>
+            <div class="json-indent-row">
+                <label for="jsonIndent">缩进：</label>
+                <select id="jsonIndent">
+                    <option value="2">2 空格</option>
+                    <option value="4" selected>4 空格</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn primary" id="btnFormat"><span class="ico" style="--ico:url(../assets/icons/sparkles.svg)"></span> 格式化</button>
+                <button class="btn" id="btnCompress"><span class="ico" style="--ico:url(../assets/icons/minimize.svg)"></span> 压缩</button>
+                <button class="btn success" id="btnValidate"><span class="ico" style="--ico:url(../assets/icons/check.svg)"></span> 校验</button>
+                <button class="btn" id="btnEscape"><span class="ico" style="--ico:url(../assets/icons/refresh-cw.svg)"></span> 转义</button>
+                <button class="btn" id="btnUnescape"><span class="ico" style="--ico:url(../assets/icons/refresh-cw.svg)"></span> 反转义</button>
+                <button class="btn danger" id="btnClear"><span class="ico" style="--ico:url(../assets/icons/trash-2.svg)"></span> 清空</button>
+            </div>
+            <div id="jsonStatus" class="status-msg">等待操作…</div>
+            <div style="display:none;" id="resultWrapper">
+                <div id="jsonResult" class="result-box"></div>
+                <button class="btn" id="btnCopy" style="margin-top:8px;"><span class="ico" style="--ico:url(../assets/icons/copy.svg)"></span> 复制</button>
+            </div>
+        </div>
+
+        <div class="footer">全程在浏览器里跑，不上传任何数据</div>
+    </div>
+
+    <!-- ===== 引入独立的 policy.js ===== -->
+    <script src="/policy.js"></script>
+
+    <!-- ===== JSON 工具逻辑 ===== -->
+    <script>
+        (function() {
+            'use strict';
+
+            const inputEl = document.getElementById('jsonInput');
+            const resultEl = document.getElementById('jsonResult');
+            const statusEl = document.getElementById('jsonStatus');
+            const btnFormat = document.getElementById('btnFormat');
+            const btnCompress = document.getElementById('btnCompress');
+            const btnValidate = document.getElementById('btnValidate');
+            const btnEscape = document.getElementById('btnEscape');
+            const btnUnescape = document.getElementById('btnUnescape');
+            const btnClear = document.getElementById('btnClear');
+            const indentSelect = document.getElementById('jsonIndent');
+            const resultWrapper = document.getElementById('resultWrapper');
+            const btnCopy = document.getElementById('btnCopy');
+
+            function setStatus(msg, type) {
+                statusEl.textContent = msg;
+                statusEl.className = 'status-msg' + (type ? ' ' + type : '');
+            }
+            function showResult(text, isError) {
+                resultEl.textContent = text || '';
+                resultEl.className = 'result-box' + (isError ? ' error' : '');
+                resultWrapper.style.display = 'block';
+            }
+            function hideResult() { resultWrapper.style.display = 'none'; resultEl.className = 'result-box'; }
+            function getJsonData() {
+                const raw = inputEl.value.trim();
+                if (!raw) { setStatus('请输入 JSON 数据', 'error'); return null; }
+                try { return JSON.parse(raw); }
+                catch (e) { setStatus('JSON 解析错误: ' + e.message, 'error'); showResult(e.message, true); return null; }
+            }
+
+            btnFormat.addEventListener('click', function() {
+                const data = getJsonData();
+                if (data === null) return;
+                const indent = parseInt(indentSelect.value, 10);
+                try { const formatted = JSON.stringify(data, null, indent); showResult(formatted, false); setStatus('格式化成功', 'success'); }
+                catch (e) { setStatus('格式化失败: ' + e.message, 'error'); showResult(e.message, true); }
+            });
+            btnCompress.addEventListener('click', function() {
+                const data = getJsonData();
+                if (data === null) return;
+                try { const compressed = JSON.stringify(data); showResult(compressed, false); setStatus('压缩成功', 'success'); }
+                catch (e) { setStatus('压缩失败: ' + e.message, 'error'); showResult(e.message, true); }
+            });
+            btnValidate.addEventListener('click', function() {
+                const raw = inputEl.value.trim();
+                if (!raw) { setStatus('请输入 JSON 数据', 'error'); hideResult(); return; }
+                try { JSON.parse(raw); setStatus('校验通过', 'success'); showResult('JSON 语法正确', false); }
+                catch (e) { setStatus('校验失败: ' + e.message, 'error'); showResult(e.message, true); }
+            });
+            btnEscape.addEventListener('click', function() {
+                const raw = inputEl.value.trim();
+                if (!raw) { setStatus('请输入 JSON 数据', 'error'); hideResult(); return; }
+                const escaped = JSON.stringify(raw);
+                showResult(escaped, false); setStatus('转义成功', 'success');
+            });
+            btnUnescape.addEventListener('click', function() {
+                const raw = inputEl.value.trim();
+                if (!raw) { setStatus('请输入字符串', 'error'); hideResult(); return; }
+                try { const unescaped = JSON.parse(raw); showResult(unescaped, false); setStatus('反转义成功', 'success'); }
+                catch (e) { setStatus('反转义失败: ' + e.message, 'error'); showResult(e.message, true); }
+            });
+            btnClear.addEventListener('click', function() { inputEl.value = ''; hideResult(); setStatus('已清空', ''); });
+            btnCopy.addEventListener('click', function() {
+                const text = resultEl.textContent;
+                if (!text) { setStatus('没有可复制的内容', 'error'); return; }
+                navigator.clipboard.writeText(text).then(function() { setStatus('已复制到剪贴板', 'success'); }).catch(function() { setStatus('复制失败', 'error'); });
+            });
+
+            window.addEventListener('load', function() { setStatus('输入 JSON 数据，点击按钮操作', ''); hideResult(); });
+            console.log('JSON 格式化器已启动 (政策由 policy.js 管理)');
+        })();
+    </script>
+</body>
+</html>

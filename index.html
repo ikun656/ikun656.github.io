@@ -260,30 +260,8 @@ Cloud 文件下载：文件列表通过 GitHub 官方 API 直连获取，不经�
         <div class="page" id="page-json">
             <h2>JSON 格式化器</h2>
             <div class="page-desc">把 JSON 粘进来，格式化、压缩、校验、转义都行，还支持自定义缩进。</div>
-            <div class="json-tool-area">
-                <textarea id="jsonInput" placeholder="在此粘贴 JSON 数据…">{"name":"ikun656","tools":["vsix","json"],"version":"1.0"}</textarea>
-                <div id="jsonIndentRow" class="json-indent-row">
-                    <label style="font-size:13px;color:#64748a;margin-right:8px;">缩进：</label>
-                    <select id="jsonIndent" style="padding:4px 10px;border:1px solid #d1d9e6;border-radius:6px;font-size:13px;background:#fff;">
-                        <option value="2">2 空格</option>
-                        <option value="4" selected>4 空格</option>
-                    </select>
-                </div>
-                <div class="btn-group">
-                    <button class="btn primary" id="btnFormat"><span class="ico" style="--ico:url(assets/icons/sparkles.svg)"></span> 格式化</button>
-                    <button class="btn" id="btnCompress"><span class="ico" style="--ico:url(assets/icons/minimize.svg)"></span> 压缩</button>
-                    <button class="btn success" id="btnValidate"><span class="ico" style="--ico:url(assets/icons/check.svg)"></span> 校验</button>
-                    <button class="btn" id="btnEscape"><span class="ico" style="--ico:url(assets/icons/refresh-cw.svg)"></span> 转义</button>
-                    <button class="btn" id="btnUnescape"><span class="ico" style="--ico:url(assets/icons/refresh-cw.svg)"></span> 反转义</button>
-                    <button class="btn danger" id="btnClear"><span class="ico" style="--ico:url(assets/icons/trash-2.svg)"></span> 清空</button>
-                </div>
-                <div id="jsonStatus" class="status-msg">等待操作…</div>
-                <div style="display:none;" id="resultWrapper">
-                    <div id="jsonResult" class="result-box"></div>
-                    <button class="btn" id="btnCopy" style="margin-top:8px;"><span class="ico" style="--ico:url(assets/icons/copy.svg)"></span> 复制</button>
-                </div>
-            </div>
             <div class="page-meta">全程在浏览器里跑，不上传任何数据</div>
+            <a href="./json/json-formatter.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
         </div>
         <!-- 更多 -->
         <div class="page" id="page-more">
@@ -301,77 +279,6 @@ Cloud 文件下载：文件列表通过 GitHub 官方 API 直连获取，不经�
 
             // 导航切换与内容渲染由 cms.js 接管
 
-            // ===== JSON 工具 =====
-            const inputEl = document.getElementById('jsonInput');
-            const resultEl = document.getElementById('jsonResult');
-            const statusEl = document.getElementById('jsonStatus');
-            const btnFormat = document.getElementById('btnFormat');
-            const btnCompress = document.getElementById('btnCompress');
-            const btnValidate = document.getElementById('btnValidate');
-            const btnEscape = document.getElementById('btnEscape');
-            const btnUnescape = document.getElementById('btnUnescape');
-            const btnClear = document.getElementById('btnClear');
-            const indentRow = document.getElementById('jsonIndentRow');
-            const indentSelect = document.getElementById('jsonIndent');
-            const resultWrapper = document.getElementById('resultWrapper');
-            const btnCopy = document.getElementById('btnCopy');
-
-            function setStatus(msg, type) {
-                statusEl.textContent = msg;
-                statusEl.className = 'status-msg' + (type ? ' ' + type : '');
-            }
-            function showResult(text, isError) {
-                resultEl.textContent = text || '';
-                resultEl.className = 'result-box' + (isError ? ' error' : '');
-                resultWrapper.style.display = 'block';
-            }
-            function hideResult() { resultWrapper.style.display = 'none'; resultEl.className = 'result-box'; }
-            function getJsonData() {
-                const raw = inputEl.value.trim();
-                if (!raw) { setStatus('请输入 JSON 数据', 'error'); return null; }
-                try { return JSON.parse(raw); }
-                catch (e) { setStatus('JSON 解析错误: ' + e.message, 'error'); showResult(e.message, true); return null; }
-            }
-
-            btnFormat.addEventListener('click', function() {
-                const data = getJsonData();
-                if (data === null) return;
-                const indent = parseInt(indentSelect ? indentSelect.value : 4);
-                try { const formatted = JSON.stringify(data, null, indent); showResult(formatted, false); setStatus('格式化成功', 'success'); }
-                catch (e) { setStatus('格式化失败: ' + e.message, 'error'); showResult(e.message, true); }
-            });
-            btnCompress.addEventListener('click', function() {
-                const data = getJsonData();
-                if (data === null) return;
-                try { const compressed = JSON.stringify(data); showResult(compressed, false); setStatus('压缩成功', 'success'); }
-                catch (e) { setStatus('压缩失败: ' + e.message, 'error'); showResult(e.message, true); }
-            });
-            btnValidate.addEventListener('click', function() {
-                const raw = inputEl.value.trim();
-                if (!raw) { setStatus('请输入 JSON 数据', 'error'); hideResult(); return; }
-                try { JSON.parse(raw); setStatus('校验通过', 'success'); showResult('JSON 语法正确', false); }
-                catch (e) { setStatus('校验失败: ' + e.message, 'error'); showResult(e.message, true); }
-            });
-            btnEscape.addEventListener('click', function() {
-                const raw = inputEl.value.trim();
-                if (!raw) { setStatus('请输入 JSON 数据', 'error'); hideResult(); return; }
-                const escaped = JSON.stringify(raw);
-                showResult(escaped, false); setStatus('转义成功', 'success');
-            });
-            btnUnescape.addEventListener('click', function() {
-                const raw = inputEl.value.trim();
-                if (!raw) { setStatus('请输入字符串', 'error'); hideResult(); return; }
-                try { const unescaped = JSON.parse(raw); showResult(unescaped, false); setStatus('反转义成功', 'success'); }
-                catch (e) { setStatus('反转义失败: ' + e.message, 'error'); showResult(e.message, true); }
-            });
-            btnClear.addEventListener('click', function() { inputEl.value = ''; hideResult(); setStatus('已清空', ''); });
-            btnCopy.addEventListener('click', function() {
-                const text = resultEl.textContent;
-                if (!text) { setStatus('没有可复制的内容', 'error'); return; }
-                navigator.clipboard.writeText(text).then(function() { setStatus('已复制到剪贴板', 'success'); }).catch(function() { setStatus('复制失败', 'error'); });
-            });
-
-            window.addEventListener('load', function() { setStatus('输入 JSON 数据，点击按钮操作', ''); hideResult(); });
             // 重新查看政策说明
             const viewPolicyBtn = document.getElementById('viewPolicyBtn');
             if (viewPolicyBtn) {
