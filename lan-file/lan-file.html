@@ -183,12 +183,19 @@
             document.body.removeChild(ta); return ok;
         }
         function copyText(text, btn) {
-            var done = false;
+            if (btn) btn.textContent = '复制中…';
+            function report(ok) {
+                if (btn) btn.textContent = ok ? '已复制 ✓' : '复制失败';
+                setTimeout(function () { if (btn) btn.textContent = '复制'; }, 1500);
+            }
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(function () { done = true; }, function () { done = fallbackCopy(text); });
-            } else { done = fallbackCopy(text); }
-            if (btn) btn.textContent = done ? '已复制 ✓' : '复制失败';
-            setTimeout(function () { if (btn) btn.textContent = '复制'; }, 1500);
+                navigator.clipboard.writeText(text).then(
+                    function () { report(true); },
+                    function () { report(fallbackCopy(text)); }
+                );
+            } else {
+                report(fallbackCopy(text));
+            }
         }
 
         // ---- 角色选择 ----
