@@ -190,6 +190,7 @@
             <li data-page="json"><span class="ico" style="--ico:url(assets/icons/braces.svg)"></span> JSON 格式化器</li>
             <li data-page="base64"><span class="ico" style="--ico:url(assets/icons/refresh-cw.svg)"></span> Base64 编解码</li>
             <li data-page="timestamp"><span class="ico" style="--ico:url(assets/icons/search.svg)"></span> 时间戳转换</li>
+            <li data-page="lan"><span class="ico" style="--ico:url(assets/icons/globe.svg)"></span> 局域网传文件</li>
             <li data-page="more"><span class="ico" style="--ico:url(assets/icons/ellipsis.svg)"></span> 更多工具</li>
         </ul>
         <div class="sidebar-settings">
@@ -250,6 +251,13 @@
             <div class="page-desc">Unix 时间戳和日期互转，自动判断秒或毫秒，本地时间和 UTC 都给你。</div>
             <div class="page-meta">全程在浏览器里跑，不上传任何数据</div>
             <a href="./timestamp/timestamp.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
+        </div>
+        <!-- 局域网传文件 -->
+        <div class="page" id="page-lan">
+            <h2>局域网传文件</h2>
+            <div class="page-desc">两台设备在同一局域网，无需服务器，点对点直接传文件。靠互相复制一次邀请码/应答码建立连接。</div>
+            <div class="page-meta">纯前端 WebRTC 直传，文件不经过任何服务器</div>
+            <a href="./lan-file/lan-file.html" class="btn-primary">前往使用 <span class="arrow">→</span></a>
         </div>
         <!-- 更多 -->
         <div class="page" id="page-more">

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局域网传文件</title>
+    <link rel="stylesheet" href="/theme.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 40px 20px; color: var(--text); transition: background .2s, color .2s; }
+        .container { max-width: 860px; margin: 0 auto; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 30px 35px; transition: background .2s; }
+        h1 { font-size: 28px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; color: var(--text-strong); }
+        .sub { color: var(--text-muted); font-size: 15px; margin-bottom: 20px; border-left: 4px solid var(--accent-bar); padding-left: 14px; }
+        .ico { display: inline-block; width: 1.1em; height: 1.1em; flex-shrink: 0; background-color: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; vertical-align: -0.15em; }
+        .btn .ico { margin-right: 6px; }
+
+        .tip { background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+        .tip strong { color: var(--text-strong); }
+
+        .role-pick { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+        .role-btn { flex: 1; min-width: 160px; padding: 18px; border: 2px solid var(--border-strong); border-radius: 14px; background: var(--surface-2); cursor: pointer; text-align: center; transition: border .2s, background .2s; }
+        .role-btn.active { border-color: var(--primary); background: rgba(37,99,235,0.06); }
+        .role-btn .t { font-size: 17px; font-weight: 600; color: var(--text-strong); }
+        .role-btn .d { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        .panel { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+        .panel h3 { font-size: 16px; margin-bottom: 12px; color: var(--text-strong); display: flex; align-items: center; gap: 8px; }
+        .step { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+
+        .btn { padding: 8px 20px; border: none; border-radius: 30px; font-weight: 500; cursor: pointer; transition: background .2s; background: var(--btn-bg); color: var(--text); font-size: 14px; }
+        .btn:hover { background: var(--btn-bg-hover); }
+        .btn.primary { background: var(--primary); color: #fff; }
+        .btn.primary:hover { background: var(--primary-hover); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+
+        textarea { width: 100%; min-height: 90px; padding: 10px 12px; border: 2px solid var(--border-strong); border-radius: 8px; font-family: 'SF Mono','Consolas',monospace; font-size: 12px; resize: vertical; background: var(--surface); color: var(--text); }
+        textarea:focus { outline: none; border-color: var(--primary); }
+
+        .file-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .file-name { font-size: 14px; color: var(--text-strong); word-break: break-all; }
+
+        .progress { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; margin: 12px 0; border: 1px solid var(--border); }
+        .progress > div { height: 100%; width: 0; background: var(--primary); transition: width .15s; }
+
+        .status { font-size: 14px; color: var(--text-muted); margin: 8px 0; }
+        .status.error { color: var(--danger); }
+        .status.ok { color: var(--success); }
+        .status.info { color: var(--primary); }
+
+        .hidden { display: none !important; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-size: 14px; }
+        .back-link:hover { text-decoration: underline; }
+        .footer { margin-top: 26px; font-size: 13px; color: var(--text-soft); text-align: center; border-top: 1px solid var(--border); padding-top: 18px; }
+
+        @media (max-width: 480px) {
+            .container { padding: 22px 18px; }
+            .role-btn { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 政策遮罩由 /policy.js 自动注入 ===== -->
+
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回主页</a>
+        <h1><span class="ico" style="--ico:url(../assets/icons/globe.svg)"></span> 局域网传文件</h1>
+        <div class="sub">两台设备在同一局域网，无需服务器，点对点直接传文件</div>
+
+        <div class="tip">
+            <strong>怎么用：</strong> 发送方和接收方都打开本页，选好角色后，互相复制粘贴一次"邀请码 / 应答码"（可借助微信、QQ 等任意方式转发文本），连接建立后即可传文件。全过程不经过任何服务器，文件只在两台设备之间直传。<br>
+            <strong>前提：</strong> 双方都能访问本站点（HTTPS），且处于同一局域网或都可被对方网络连通。
+        </div>
+
+        <div class="role-pick">
+            <div class="role-btn" id="roleSender" data-role="sender">
+                <div class="t">我是发送方</div>
+                <div class="d">选文件，生成邀请码发给对方</div>
+            </div>
+            <div class="role-btn" id="roleReceiver" data-role="receiver">
+                <div class="t">我是接收方</div>
+                <div class="d">粘贴对方邀请码，回传应答码</div>
+            </div>
+        </div>
+
+        <!-- 发送方流程 -->
+        <div id="senderPanel" class="panel hidden">
+            <h3><span class="ico" style="--ico:url(../assets/icons/sparkles.svg)"></span> 发送方</h3>
+
+            <div class="step">1. 选择要发送的文件</div>
+            <div class="file-row">
+                <input type="file" id="sendFile" />
+                <span class="file-name" id="sendFileName"></span>
+            </div>
+
+            <div class="step" style="margin-top:16px;">2. 生成邀请码，发给接收方</div>
+            <button class="btn primary" id="btnGenOffer">生成邀请码</button>
+            <div id="offerWrap" class="hidden" style="margin-top:10px;">
+                <textarea id="offerOut" readonly></textarea>
+                <div class="btn-group">
+                    <button class="btn" id="btnCopyOffer">复制邀请码</button>
+                </div>
+            </div>
+
+            <div class="step" style="margin-top:16px;">3. 把接收方回传的应答码粘贴到这里</div>
+            <textarea id="answerIn" placeholder="粘贴接收方给你的应答码…"></textarea>
+            <div class="btn-group">
+                <button class="btn primary" id="btnUseAnswer">建立连接并发送</button>
+            </div>
+
+            <div class="progress hidden" id="sendProgress"><div></div></div>
+            <div class="status" id="sendStatus"></div>
+        </div>
+
+        <!-- 接收方流程 -->
+        <div id="receiverPanel" class="panel hidden">
+            <h3><span class="ico" style="--ico:url(../assets/icons/download.svg)"></span> 接收方</h3>
+
+            <div class="step">1. 粘贴发送方给你的邀请码</div>
+            <textarea id="offerIn" placeholder="粘贴发送方的邀请码…"></textarea>
+            <div class="btn-group">
+                <button class="btn primary" id="btnGenAnswer">生成应答码</button>
+            </div>
+
+            <div class="step" style="margin-top:16px;">2. 把应答码发回给发送方</div>
+            <div id="answerWrap" class="hidden" style="margin-top:10px;">
+                <textarea id="answerOut" readonly></textarea>
+                <div class="btn-group">
+                    <button class="btn" id="btnCopyAnswer">复制应答码</button>
+                </div>
+            </div>
+
+            <div class="progress hidden" id="recvProgress"><div></div></div>
+            <div class="status" id="recvStatus"></div>
+        </div>
+
+        <div class="footer">点对点直传，不经过服务器 · 访客 <span id="busuanzi_value_site_uv">-</span> · 浏览 <span id="busuanzi_value_site_pv">-</span></div>
+    </div>
+
+    <script src="/policy.js"></script>
+    <script src="/theme.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        if (!window.RTCPeerConnection) {
+            document.body.insertAdjacentHTML('afterbegin',
+                '<div style="max-width:860px;margin:20px auto;padding:16px;background:rgba(220,53,69,.1);border:1px solid var(--danger);border-radius:12px;color:var(--danger);">当前浏览器不支持 WebRTC，无法使用本工具。请用较新版本的 Chrome / Edge / Firefox / Safari。</div>');
+            return;
+        }
+
+        var CHUNK = 16 * 1024; // 16KB 每块
+
+        var role = null;
+        var pc = null;
+        var channel = null;
+
+        // ---- 工具函数 ----
+        function $(id) { return document.getElementById(id); }
+        function setStatus(el, msg, type) {
+            el.textContent = msg || '';
+            el.className = 'status' + (type ? ' ' + type : '');
+        }
+        function waitIceComplete(peer) {
+            return new Promise(function (resolve) {
+                if (peer.iceGatheringState === 'complete') return resolve();
+                function check() { if (peer.iceGatheringState === 'complete') { peer.removeEventListener('icegatheringstatechange', check); resolve(); } }
+                peer.addEventListener('icegatheringstatechange', check);
+                // 兜底超时：部分浏览器不触发 complete，10s 后取当前描述
+                setTimeout(resolve, 10000);
+            });
+        }
+        function newPeer() {
+            var p = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            return p;
+        }
+        function fallbackCopy(text) {
+            var ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-9999px';
+            document.body.appendChild(ta); ta.focus(); ta.select();
+            var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            document.body.removeChild(ta); return ok;
+        }
+        function copyText(text, btn) {
+            var done = false;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function () { done = true; }, function () { done = fallbackCopy(text); });
+            } else { done = fallbackCopy(text); }
+            if (btn) btn.textContent = done ? '已复制 ✓' : '复制失败';
+            setTimeout(function () { if (btn) btn.textContent = '复制'; }, 1500);
+        }
+
+        // ---- 角色选择 ----
+        function selectRole(r) {
+            role = r;
+            $('roleSender').classList.toggle('active', r === 'sender');
+            $('roleReceiver').classList.toggle('active', r === 'receiver');
+            $('senderPanel').classList.toggle('hidden', r !== 'sender');
+            $('receiverPanel').classList.toggle('hidden', r !== 'receiver');
+        }
+        $('roleSender').addEventListener('click', function () { selectRole('sender'); });
+        $('roleReceiver').addEventListener('click', function () { selectRole('receiver'); });
+
+        // ================= 发送方 =================
+        $('sendFile').addEventListener('change', function () {
+            var f = this.files && this.files[0];
+            $('sendFileName').textContent = f ? (f.name + ' （' + (f.size / 1024).toFixed(1) + ' KB）') : '';
+        });
+
+        $('btnGenOffer').addEventListener('click', async function () {
+            pc = newPeer();
+            channel = pc.createDataChannel('file');
+            var offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            setStatus($('sendStatus'), '正在生成本地连接信息（含网络候选）…', 'info');
+            await waitIceComplete(pc);
+            $('offerOut').value = JSON.stringify(pc.localDescription);
+            $('offerWrap').classList.remove('hidden');
+            setStatus($('sendStatus'), '邀请码已生成，复制发给接收方。', 'ok');
+        });
+
+        $('btnCopyOffer').addEventListener('click', function () { copyText($('offerOut').value, this); });
+
+        $('btnUseAnswer').addEventListener('click', async function () {
+            if (!pc) { setStatus($('sendStatus'), '请先生成邀请码', 'error'); return; }
+            var raw = $('answerIn').value.trim();
+            if (!raw) { setStatus($('sendStatus'), '请粘贴接收方的应答码', 'error'); return; }
+            try {
+                await pc.setRemoteDescription(JSON.parse(raw));
+            } catch (e) {
+                setStatus($('sendStatus'), '应答码无效：' + e.message, 'error'); return;
+            }
+            setStatus($('sendStatus'), '已设置应答，等待连接建立…', 'info');
+            channel.onopen = function () { sendFile(); };
+            channel.onerror = function () { setStatus($('sendStatus'), '数据通道出错', 'error'); };
+            if (channel.readyState === 'open') sendFile();
+        });
+
+        function sendFile() {
+            var f = $('sendFile').files[0];
+            if (!f) { setStatus($('sendStatus'), '没有选择文件', 'error'); return; }
+            var prog = $('sendProgress'); prog.classList.remove('hidden');
+            var bar = prog.firstElementChild;
+            channel.send(JSON.stringify({ type: 'meta', name: f.name, size: f.size }));
+            var offset = 0;
+            var reader = new FileReader();
+            function next() {
+                if (offset >= f.size) {
+                    setStatus($('sendStatus'), '文件发送完成 ✓', 'ok');
+                    return;
+                }
+                var slice = f.slice(offset, offset + CHUNK);
+                reader.onload = function () {
+                    channel.send(reader.result);
+                    offset += CHUNK;
+                    bar.style.width = Math.min(100, (offset / f.size) * 100) + '%';
+                    // 控制缓冲，避免背压堆积
+                    if (channel.bufferedAmount > 1 * 1024 * 1024) {
+                        channel.addEventListener('bufferedamountlow', function handler() {
+                            channel.removeEventListener('bufferedamountlow', handler);
+                            next();
+                        });
+                    } else {
+                        setTimeout(next, 0);
+                    }
+                };
+                reader.readAsArrayBuffer(slice);
+            }
+            next();
+        }
+
+        // ================= 接收方 =================
+        $('btnGenAnswer').addEventListener('click', async function () {
+            var raw = $('offerIn').value.trim();
+            if (!raw) { setStatus($('recvStatus'), '请先粘贴发送方的邀请码', 'error'); return; }
+            pc = newPeer();
+            pc.ondatachannel = function (ev) { channel = ev.channel; wireReceiver(channel); };
+            try {
+                await pc.setRemoteDescription(JSON.parse(raw));
+            } catch (e) {
+                setStatus($('recvStatus'), '邀请码无效：' + e.message, 'error'); return;
+            }
+            var answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            setStatus($('recvStatus'), '正在生成本地应答信息（含网络候选）…', 'info');
+            await waitIceComplete(pc);
+            $('answerOut').value = JSON.stringify(pc.localDescription);
+            $('answerWrap').classList.remove('hidden');
+            setStatus($('recvStatus'), '应答码已生成，复制发回给发送方，等待接收文件…', 'ok');
+        });
+
+        $('btnCopyAnswer').addEventListener('click', function () { copyText($('answerOut').value, this); });
+
+        function wireReceiver(ch) {
+            var meta = null, received = 0, chunks = [];
+            ch.onmessage = function (e) {
+                if (typeof e.data === 'string') {
+                    var msg = JSON.parse(e.data);
+                    if (msg.type === 'meta') {
+                        meta = msg; received = 0; chunks = [];
+                        var prog = $('recvProgress'); prog.classList.remove('hidden');
+                        setStatus($('recvStatus'), '开始接收：' + msg.name, 'info');
+                    }
+                } else {
+                    if (!meta) return;
+                    chunks.push(e.data);
+                    received += e.data.byteLength;
+                    $('recvProgress').firstElementChild.style.width = Math.min(100, (received / meta.size) * 100) + '%';
+                    if (received >= meta.size) {
+                        var blob = new Blob(chunks);
+                        var a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = meta.name;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                        URL.revokeObjectURL(a.href);
+                        setStatus($('recvStatus'), '接收完成，已保存：' + meta.name + ' ✓', 'ok');
+                    }
+                }
+            };
+        }
+
+        console.log('局域网传文件已启动');
+    })();
+    </script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>
