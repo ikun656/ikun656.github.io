@@ -1,21 +1,39 @@
-MIT License
+ikun656 工具站 许可证
+====================
 
-Copyright (c) 2026 ikun656
+版权所有 © 2026 ikun656。保留一切权利。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+本许可证适用于本仓库（ikun656.github.io）中的全部内容，包括但不限于网页、脚本、样式、图标、文档及其中所载的任何文字与代码（统称"本内容"）。
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+一、授予的权限
+在遵守本许可证各项条款的前提下，版权所有人授予您一项免费的、可撤销的、非独占的、不可转让的许可，允许您：
+1. 为个人学习或非商业目的，下载并访问本内容；
+2. 为个人使用之需，在您自有设备上保留本内容的本地副本；
+3. 在原始、未改动且保留全部版权与许可声明的前提下，离线查看本内容。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+二、明确禁止
+未经版权所有人书面许可，您不得：
+1. 以任何方式修改、改编、翻译、反编译或创作基于本内容的衍生作品；
+2. 分发、再分发、传播、公开展示或提供本内容的下载（无论原始或修改后）；
+3. 将本内容用于任何商业目的，或从中直接或间接获利；
+4. 移除、遮盖或更改本内容中的任何版权、商标或其他权利声明；
+5. 就本内容向任何第三方再许可、转授权或主张任何权利。
+
+三、免责声明
+本内容按"现状"提供，不提供任何明示或暗示的担保，包括但不限于对适销性、特定用途适用性或不侵权的担保。版权所有人不对因使用或无法使用本内容而导致的任何直接或间接损失负责。
+
+四、许可的终止
+若您违反本许可证任何条款，本许可将自动终止，您须立即停止使用并删除所有已保留的副本。终止不影响版权所有人依据法律享有的任何其他救济。
+
+五、其他
+本许可证构成您与本版权所有人之间关于本内容的完整协议。如有条款被认定为无效，不影响其余条款的效力。
+
+---
+ikun656 Tools Site License
+Copyright © 2026 ikun656. All rights reserved.
+
+Permission is granted, free of charge, to any individual to download and access the Content for personal, non-commercial use and to keep a local copy for personal use, provided the Content is kept intact with all copyright and license notices.
+
+You may NOT modify, adapt, translate, decompile, or create derivative works of the Content; redistribute, republish, publicly display, or offer it for download (in original or modified form); use it for any commercial purpose or derive profit from it; remove or alter any copyright, trademark, or proprietary notices; or sublicense or transfer any rights in the Content, without prior written permission from the copyright owner.
+
+The Content is provided "AS IS", without warranty of any kind. The license terminates automatically upon breach of any term.
