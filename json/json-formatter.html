@@ -241,10 +241,26 @@
                 catch (e) { setStatus('反转义失败: ' + e.message, 'error'); showResult(e.message, true); }
             });
             btnClear.addEventListener('click', function() { inputEl.value = ''; hideResult(); setStatus('已清空', ''); });
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.top = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus(); ta.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                document.body.removeChild(ta);
+                return ok;
+            }
             btnCopy.addEventListener('click', function() {
                 const text = resultEl.textContent;
                 if (!text) { setStatus('没有可复制的内容', 'error'); return; }
-                navigator.clipboard.writeText(text).then(function() { setStatus('已复制到剪贴板', 'success'); }).catch(function() { setStatus('复制失败', 'error'); });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function() { setStatus('已复制到剪贴板', 'success'); }).catch(function() { setStatus(fallbackCopy(text) ? '已复制到剪贴板' : '复制失败', fallbackCopy(text) ? 'success' : 'error'); });
+                } else {
+                    setStatus(fallbackCopy(text) ? '已复制到剪贴板' : '复制失败', fallbackCopy(text) ? 'success' : 'error');
+                }
             });
 
             window.addEventListener('load', function() { setStatus('输入 JSON 数据，点击按钮操作', ''); hideResult(); });
