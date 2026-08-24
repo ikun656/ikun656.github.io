@@ -226,7 +226,6 @@
                     // 2. 常用代理
                     (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
                     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                    (url) => `https://cors-anywhere.herokuapp.com/${url}`,
                 ];
 
                 let lastError = null;
