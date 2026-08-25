@@ -339,6 +339,14 @@
         console.log('局域网传文件已启动');
     })();
     </script>
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <script>
+      // 应用内嵌的 WebView 不计入站点访客统计
+      if (!/LanFileTransfer\//.test(navigator.userAgent)) {
+        var bsz = document.createElement('script');
+        bsz.async = true;
+        bsz.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+        document.body.appendChild(bsz);
+      }
+    </script>
 </body>
 </html>
