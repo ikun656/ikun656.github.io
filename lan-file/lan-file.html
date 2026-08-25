@@ -340,12 +340,21 @@
     })();
     </script>
     <script>
-      // 应用内嵌的 WebView 不计入站点访客统计
-      if (!/LanFileTransfer\//.test(navigator.userAgent)) {
+      // 应用内嵌的 WebView（带 ?from=app）不计入站点访客统计
+      var inApp = /[?&]from=app\b/.test(location.search);
+      if (!inApp) {
         var bsz = document.createElement('script');
         bsz.async = true;
         bsz.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
         document.body.appendChild(bsz);
+      } else {
+        // 隐藏统计占位，避免显示 “-”
+        document.addEventListener('DOMContentLoaded', function () {
+          var uv = document.getElementById('busuanzi_value_site_uv');
+          var pv = document.getElementById('busuanzi_value_site_pv');
+          if (uv) uv.parentElement.style.display = 'none';
+          if (pv) pv.parentElement.style.display = 'none';
+        });
       }
     </script>
 </body>
